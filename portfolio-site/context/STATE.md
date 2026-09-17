@@ -11,11 +11,12 @@
 ## Публикации
 | Проект | Адрес | Папка на хостинге |
 | --- | --- | --- |
-| Портфолио Александры Мельниковой | http://rootlost.online/ | `/www/rootlost.online` |
-| Политика конфиденциальности | http://rootlost.online/privacy.html | там же |
-| Демо-сайт «ТехРемонт» | http://rootlost.online/remont/ | `/www/rootlost.online/remont` |
+| Портфолио Александры Мельниковой | https://rootlost.online/ | `/www/rootlost.online` |
+| Политика конфиденциальности | https://rootlost.online/privacy.html | там же |
+| Демо-сайт «ТехРемонт» | https://rootlost.online/remont/ | `/www/rootlost.online/remont` |
 | Сайт «КИТ-Строй.Москва» (тема WordPress) | https://rootlost.ru/ | `/www/rootlost.ru/wp-content/themes/kitstroy-moscow` |
 
+SSL на `rootlost.online` работает: и `http`, и `https` отвечают 200.
 Пароль FTP в файлах проекта не хранится — передаётся через переменные окружения.
 
 ## Портфолио: концепция «печатный каталог»
@@ -130,14 +131,15 @@ SCSS пересобран (`npx sass assets/src/scss/style.scss:assets/dist/css/
 - Кейс Sertexity — вёрстка по макету, сайт без живого адреса.
 
 ## Что нужно от владельца
-- **Включить SSL** для `rootlost.online` в панели reg.ru: сейчас работает только `http://`.
-  После включения `canonical` и `og:url` уже указывают на `https://`.
 - Сменить пароль FTP (передавался в переписке).
 - Сказать, если карта OpenStreetMap на `rootlost.ru/contacts/` раньше отображалась: тогда
   пустая область была разовой, а подпись со ссылкой осталась подстраховкой.
+- Выгрузить обновлённую тему `kitstroy-moscow` на `rootlost.ru`: правки темы лежат только
+  локально, в git клиентские проекты не попадают.
 
 ## Следующий шаг
-- Выгрузить обновлённые `portfolio-site` и тему `kitstroy-moscow` на хостинг (workflow «Публикация»).
+- Живой `rootlost.online` пока отдаёт прошлую сборку (`main-CPW7DZZJ.js`), локальная —
+  свежая (`main-DiNPJOWn.js`): нужна публикация портфолио (workflow «Публикация»).
 - Если у демо-сайта появится реальный заказчик — заменить реквизиты в `src/data/site.mjs` и снять флаг `demo`.
 - Заменить чертёжные заглушки изображений на фотографии объектов, когда они появятся.
 - Если у Александры появится отдельный бренд или логотип — заменить монограмму «АМ» в `src/components/Logo.tsx`.
