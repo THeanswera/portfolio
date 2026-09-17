@@ -14,3 +14,4 @@ dist/
 .backup/
 *.log
 .DS_Store
+.tmp-*
