@@ -1,0 +1,346 @@
+/* Основа: токены, сброс, типографика, кнопки, поля.
+   Тёмная инженерная база: уголь, дерево, латунь. */
+
+:root {
+  --bg: #111312;
+  --bg-2: #151816;
+  --surface: #191d1a;
+  --surface-2: #202521;
+  --line: #2c322e;
+  --line-2: #3b423d;
+  --text: #f1ede6;
+  --text-soft: #9aa19b;
+  --text-dim: #6f7671;
+  --wood: #c08a52;
+  --brass: #d9b268;
+  --brass-hi: #e7c57e;
+  --danger: #d2704a;
+
+  --font-sans: 'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --container: 1320px;
+  --pad: 20px;
+  --section: clamp(56px, 7.5vw, 116px);
+  --radius: 3px;
+  --d-bg: var(--bg-2);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+figure,
+blockquote {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--brass);
+  color: #17190f;
+}
+
+/* --- типографика --- */
+
+.display {
+  font-size: clamp(31px, 5.1vw, 62px);
+  line-height: 0.99;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+
+.display em {
+  font-style: normal;
+  color: var(--brass);
+}
+
+h2,
+.h2 {
+  font-size: clamp(26px, 3.5vw, 44px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+h3,
+.h3 {
+  font-size: clamp(19px, 1.7vw, 23px);
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+
+.lead {
+  font-size: clamp(16px, 1.35vw, 19px);
+  line-height: 1.58;
+  color: var(--text-soft);
+}
+
+.text-soft {
+  color: var(--text-soft);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.measure {
+  max-width: 62ch;
+}
+
+/* --- сетка --- */
+
+.container {
+  width: min(100% - var(--pad) * 2, var(--container));
+  margin-inline: auto;
+}
+
+/* Сетки всегда с minmax(0, …): иначе авто-колонка растягивается
+   по самому длинному слову и страница едет вбок на телефоне. */
+.grid-safe,
+.hero__grid,
+.head,
+.cards,
+.facts,
+.promises,
+.split,
+.footer__grid,
+.tool__stage,
+.cta__grid,
+.steps {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.section {
+  padding-block: var(--section);
+}
+
+.section--tight {
+  padding-block: clamp(40px, 5vw, 72px);
+}
+
+.rule {
+  border-top: 1px solid var(--line);
+}
+
+/* --- кнопки --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn svg {
+  flex: none;
+}
+
+.btn--primary {
+  background: var(--brass);
+  color: #17190f;
+}
+
+.btn--primary:hover {
+  background: var(--brass-hi);
+  transform: translateY(-1px);
+}
+
+.btn--ghost {
+  border-color: var(--line-2);
+  color: var(--text);
+}
+
+.btn--ghost:hover {
+  border-color: var(--text);
+  background: rgb(255 255 255 / 4%);
+}
+
+.btn--small {
+  min-height: 42px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.link {
+  color: var(--brass);
+  border-bottom: 1px solid rgb(217 178 104 / 35%);
+  transition: border-color 0.2s ease;
+}
+
+.link:hover {
+  border-color: var(--brass);
+}
+
+/* --- поля --- */
+
+.field {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color 0.2s ease;
+}
+
+.field::placeholder {
+  color: var(--text-dim);
+}
+
+.field:hover {
+  border-color: var(--text-dim);
+}
+
+.field:focus {
+  border-color: var(--brass);
+  outline: none;
+}
+
+.field--area {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  accent-color: var(--brass);
+}
+
+/* --- служебное --- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--brass);
+  color: #17190f;
+}
+
+.skip:focus {
+  top: 16px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --pad: 32px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --pad: 48px;
+  }
+}

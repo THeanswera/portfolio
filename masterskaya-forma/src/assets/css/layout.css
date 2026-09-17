@@ -1,0 +1,255 @@
+/* Шапка, подвал, секции-обёртки. */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgb(17 19 18 / 88%);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 68px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-right: auto;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logo__mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--brass);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brass);
+}
+
+.logo__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo__name {
+  font-size: 17px;
+}
+
+.logo__note {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.nav {
+  display: none;
+  gap: 26px;
+  font-size: 15px;
+}
+
+.nav a {
+  position: relative;
+  padding-block: 6px;
+  color: var(--text-soft);
+  transition: color 0.2s ease;
+}
+
+.nav a::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--brass);
+  content: '';
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.nav a:hover,
+.nav a[aria-current='page'] {
+  color: var(--text);
+}
+
+.nav a:hover::after,
+.nav a[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+.header__phone {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-soft);
+  transition: color 0.2s ease;
+}
+
+.header__phone:hover {
+  color: var(--brass);
+}
+
+.header__cta {
+  display: none;
+}
+
+.burger {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: none;
+  cursor: pointer;
+}
+
+.burger span {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--text);
+  transition: transform 0.25s ease;
+}
+
+.burger span + span {
+  margin-top: 5px;
+}
+
+.burger[aria-expanded='true'] span:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+
+.burger[aria-expanded='true'] span:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
+/* мобильное меню */
+
+.menu {
+  position: fixed;
+  inset: 69px 0 0;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px var(--pad) 40px;
+  background: var(--bg);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.menu[data-open='true'] {
+  visibility: visible;
+  opacity: 1;
+}
+
+.menu a {
+  padding-block: 15px;
+  border-bottom: 1px solid var(--line);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.menu__foot {
+  margin-top: auto;
+  padding-top: 24px;
+  font-size: 15px;
+  color: var(--text-soft);
+}
+
+/* подвал */
+
+.footer {
+  border-top: 1px solid var(--line);
+  background: var(--bg-2);
+  padding-block: clamp(40px, 5vw, 72px) 28px;
+}
+
+.footer__grid {
+  display: grid;
+  gap: 36px;
+}
+
+.footer__col h3 {
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.footer__col li + li {
+  margin-top: 9px;
+}
+
+.footer__col a:hover {
+  color: var(--brass);
+}
+
+.footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  justify-content: space-between;
+  margin-top: 44px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.footer__demo {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 26px;
+  padding: 14px 16px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.footer__demo svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--wood);
+}
+
+@media (min-width: 900px) {
+  .nav,
+  .header__phone,
+  .header__cta {
+    display: flex;
+  }
+
+  .burger {
+    display: none;
+  }
+
+  .footer__grid {
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  }
+}

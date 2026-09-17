@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Григорий Мельников — верстка и разработка сайтов">
+  <rect width="64" height="64" rx="6" fill="#F4F1EA"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="5.5" fill="none" stroke="#14120F" stroke-width="1.5"/>
+  <path d="M12 22V12h10M42 12h10v10M52 42v10H42M22 52H12V42" fill="none" stroke="#14120F" stroke-width="3" stroke-linecap="square"/>
+  <rect x="25" y="25" width="14" height="14" fill="#D33A1C"/>
+</svg>

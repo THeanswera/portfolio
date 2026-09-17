@@ -1,0 +1,69 @@
+name: Проверки
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  portfolio:
+    name: Портфолио
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portfolio-site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: portfolio-site/package-lock.json
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      - name: Типы и сборка
+        run: npm run build
+
+      - name: Проверка в браузере на 360, 768 и 1440
+        run: node scripts/check-responsive.mjs
+
+      - name: Кодировка и ссылки
+        run: |
+          node scripts/check-mojibake.mjs dist html,css,js
+          node scripts/check-links.mjs dist
+
+      - name: Отчёт проверки
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-report
+          path: |
+            .tmp-check/report.json
+            .tmp-check/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+  masterskaya:
+    name: Демо-сайт мастерской
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: masterskaya-forma
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Сборка
+        run: node build.mjs
+
+      - name: Проверка в браузере на 360, 768 и 1440
+        run: node scripts/check.mjs

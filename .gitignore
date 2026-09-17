@@ -1,0 +1,33 @@
+# Клиентские проекты и рабочие материалы в репозиторий не попадают.
+/0_verstka_po_maketu/
+/2_корп сайт Sergey_aoqado/
+/Корпоративный сайт/
+
+# Резервные копии — где бы они ни лежали
+**/.backup/
+
+# Зависимости и результат сборки
+node_modules/
+dist/
+
+# Временные папки скриптов проверки и съёмки
+.tmp*/
+**/.tmp*/
+
+# Служебные файлы
+*.bak
+*.log
+*.pid
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Секреты и доступы — только через переменные окружения и секреты GitHub
+.env
+.env.*
+*.pem
+*.key
+
+# Заявки, сохранённые обработчиком демо-сайта
+masterskaya-forma/public/data/leads.jsonl
+masterskaya-forma/public/data/rate.json

@@ -1,0 +1,72 @@
+name: Публикация
+
+# Запускается вручную: публикация на живой сайт — осознанное действие,
+# а не побочный эффект каждого коммита.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Что публикуем
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - portfolio
+          - masterskaya
+
+jobs:
+  deploy:
+    name: Сборка и выгрузка
+    runs-on: ubuntu-latest
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USER: ${{ secrets.FTP_USER }}
+      FTP_PASS: ${{ secrets.FTP_PASS }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: portfolio-site/package-lock.json
+
+      - name: Проверка доступа к хостингу
+        run: |
+          if [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
+            echo "Не заданы секреты FTP_USER и FTP_PASS — публикация невозможна."
+            exit 1
+          fi
+
+      - name: Сборка портфолио
+        if: inputs.target != 'masterskaya'
+        working-directory: portfolio-site
+        run: |
+          npm ci
+          npm run build
+
+      - name: Сборка демо-сайта
+        if: inputs.target != 'portfolio'
+        working-directory: masterskaya-forma
+        run: node build.mjs
+
+      - name: Выгрузка портфолио
+        if: inputs.target != 'masterskaya'
+        working-directory: portfolio-site
+        env:
+          FTP_DIR: /www/rootlost.online
+        run: node scripts/deploy.mjs
+
+      - name: Выгрузка демо-сайта
+        if: inputs.target != 'portfolio'
+        env:
+          FTP_SRC: masterskaya-forma/dist
+          FTP_DIR: /www/masterskaya-forma.ru
+        run: node portfolio-site/scripts/deploy.mjs
+
+      - name: Проверка живых сайтов
+        run: |
+          curl -s -o /dev/null -w "rootlost.online → %{http_code}\n" --max-time 30 https://rootlost.online/
+          curl -s -o /dev/null -w "masterskaya-forma.ru → %{http_code}\n" --max-time 30 https://masterskaya-forma.ru/

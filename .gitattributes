@@ -1,0 +1,15 @@
+# Единые переводы строк в репозитории, чтобы диффы не шумели.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff2 binary
+*.pdf binary
+
+# Сгенерированные файлы не показываем в статистике языка
+package-lock.json linguist-generated=true
+src/assets/css/fonts.css linguist-generated=true

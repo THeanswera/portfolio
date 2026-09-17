@@ -1,0 +1,13 @@
+{
+  "name": "masterskaya-forma",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Демо-сайт мастерской мебели и кухонь на заказ — статика, генератор страниц, конфигуратор",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node scripts/serve.mjs",
+    "fonts": "node scripts/fetch-fonts.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}

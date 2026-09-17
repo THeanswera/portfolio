@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.tmp-shots/
+.tmp-check/
+.tmp-check-profile/
+.tmp-live/
+.tmp-live-profile/
+.backup/
+*.log
+.DS_Store
