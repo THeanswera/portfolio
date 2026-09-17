@@ -32,7 +32,7 @@ jobs:
       - name: Проверка в браузере на 360, 768 и 1440
         run: node scripts/check-responsive.mjs
 
-      - name: Визуальная проверка: появление блоков, пустые полосы, переполнение
+      - name: Визуальная проверка страниц
         run: node scripts/audit-visual.mjs
 
       - name: Кодировка и ссылки
