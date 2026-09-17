@@ -5,6 +5,7 @@
  * Запуск: node scripts/check.mjs [--url http://127.0.0.1:4173/]
  */
 import { withBrowser, sleep, OVERFLOW_PROBE } from './cdp.mjs';
+import { startServer } from './lib/server.mjs';
 
 const args = process.argv.slice(2);
 const arg = (name, fallback) => {
@@ -12,7 +13,25 @@ const arg = (name, fallback) => {
   return index === -1 ? fallback : args[index + 1];
 };
 
-const base = arg('url', 'http://127.0.0.1:4173');
+/**
+ * Без --url поднимаем собственный сервер над dist. Так проверка не зависит
+ * от того, запущен ли где-то рядом serve.mjs, — это важно и локально, и в CI.
+ */
+let local = null;
+let base = arg('url', '');
+if (!base) {
+  local = await startServer({ root: 'dist', port: Number(arg('port', 4173)) });
+  base = local.url;
+}
+
+// Если сайт не отдаётся, все проверки ниже бессмысленны — говорим об этом прямо.
+const probe = await fetch(`${base}/`).catch(() => null);
+if (!probe || !probe.ok) {
+  console.error(`Сайт не отвечает по адресу ${base}/ — сначала выполните сборку: node build.mjs`);
+  if (local) await local.close();
+  process.exit(1);
+}
+
 const WIDTHS = [360, 768, 1440];
 
 const PAGES = [
@@ -284,6 +303,7 @@ try {
   }
 } finally {
   await browser.close();
+  if (local) await local.close();
 }
 
 const failed = results.filter((item) => !item.ok);
