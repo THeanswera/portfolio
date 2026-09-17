@@ -95,7 +95,6 @@ function footer() {
         <p class="text-soft" style="margin-top:16px;max-width:34ch;font-size:14.5px">
           Делаем кухни, шкафы и столы по индивидуальным размерам. Свой цех, замер, доставка и сборка.
         </p>
-        ${site.demo ? `<p class="footer__demo">${icon('info', { size: 16 })}<span>Демонстрационный проект: компания, адрес, телефон и цены вымышлены. Сайт показывает, как может выглядеть и работать настоящий сайт мастерской.</span></p>` : ''}
       </div>
 
       <div class="footer__col">

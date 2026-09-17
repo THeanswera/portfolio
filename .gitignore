@@ -32,7 +32,6 @@ desktop.ini
 .env.*
 *.pem
 *.key
-
 # Заявки, сохранённые обработчиком демо-сайта
 masterskaya-forma/public/data/leads.jsonl
 masterskaya-forma/public/data/rate.json
