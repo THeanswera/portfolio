@@ -14,6 +14,7 @@ on:
           - both
           - portfolio
           - masterskaya
+          - kitstroy
 
 jobs:
   deploy:
@@ -41,32 +42,52 @@ jobs:
           fi
 
       - name: Сборка портфолио
-        if: inputs.target != 'masterskaya'
+        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy'
         working-directory: portfolio-site
         run: |
           npm ci
           npm run build
 
       - name: Сборка демо-сайта
-        if: inputs.target != 'portfolio'
+        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy'
         working-directory: masterskaya-forma
         run: node build.mjs
 
+      - name: Сборка темы «КИТ-Строй.Москва»
+        if: inputs.target == 'kitstroy'
+        working-directory: kitstroy-moscow
+        run: node build.mjs
+
       - name: Выгрузка портфолио
-        if: inputs.target != 'masterskaya'
+        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy'
         working-directory: portfolio-site
         env:
           FTP_DIR: /www/rootlost.online
         run: node scripts/deploy.mjs
 
       - name: Выгрузка демо-сайта
-        if: inputs.target != 'portfolio'
+        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy'
         env:
           FTP_SRC: masterskaya-forma/dist
           FTP_DIR: /www/masterskaya-forma.ru
+        run: node portfolio-site/scripts/deploy.mjs
+
+      - name: Выгрузка темы «КИТ-Строй.Москва»
+        if: inputs.target == 'kitstroy'
+        env:
+          FTP_SRC: kitstroy-moscow
+          FTP_DIR: /www/rootlost.ru/wp-content/themes/kitstroy-moscow
         run: node portfolio-site/scripts/deploy.mjs
 
       - name: Проверка живых сайтов
         run: |
           curl -s -o /dev/null -w "rootlost.online → %{http_code}\n" --max-time 30 https://rootlost.online/
           curl -s -o /dev/null -w "masterskaya-forma.ru → %{http_code}\n" --max-time 30 https://masterskaya-forma.ru/
+          if [ "${{ inputs.target }}" = "kitstroy" ]; then
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://rootlost.ru/)
+            echo "rootlost.ru → $code"
+            if [ "$code" != "200" ]; then
+              echo "Тема не отвечает: проверьте вывод PHP на хостинге."
+              exit 1
+            fi
+          fi

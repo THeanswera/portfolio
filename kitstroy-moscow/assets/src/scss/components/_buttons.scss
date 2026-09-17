@@ -1,0 +1,141 @@
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-height: 52px;
+	padding: 14px 24px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-xs);
+	font-family: var(--font-heading);
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	transition:
+		transform var(--transition),
+		background-color var(--transition),
+		border-color var(--transition),
+		color var(--transition),
+		box-shadow var(--transition);
+}
+
+.button:hover {
+	transform: translate(-2px, -2px);
+}
+
+.button--primary {
+	background: var(--accent);
+	color: var(--accent-ink);
+	box-shadow: 4px 4px 0 0 rgba(69, 195, 255, 0.25);
+}
+
+.button--primary:hover {
+	background: #6fd2ff;
+	box-shadow: 6px 6px 0 0 rgba(69, 195, 255, 0.35);
+}
+
+.button--secondary {
+	border-color: var(--line);
+	background: rgba(233, 238, 245, 0.02);
+	color: var(--fg);
+}
+
+.button--secondary:hover {
+	border-color: var(--accent);
+	color: var(--accent);
+	box-shadow: 4px 4px 0 0 rgba(69, 195, 255, 0.18);
+}
+
+.button--ghost {
+	min-height: 44px;
+	padding: 10px 0;
+	color: var(--accent);
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.button--ghost::after {
+	content: "→";
+	transition: transform var(--transition);
+}
+
+.button--ghost:hover {
+	transform: none;
+	color: #6fd2ff;
+}
+
+.button--ghost:hover::after {
+	transform: translateX(4px);
+}
+
+.button--small {
+	min-height: 42px;
+	padding: 10px 16px;
+	font-size: 0.85rem;
+}
+
+.button--block {
+	width: 100%;
+}
+
+.button[disabled],
+.button[aria-disabled="true"] {
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+// Переключатель в стиле тумблера панели
+.switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 0.9rem;
+	color: var(--fg-soft);
+	cursor: pointer;
+}
+
+.switch input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.switch__track {
+	position: relative;
+	flex: none;
+	width: 42px;
+	height: 22px;
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	background: var(--panel);
+	transition: background-color var(--transition), border-color var(--transition);
+}
+
+.switch__track::after {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--muted);
+	transition: transform var(--transition), background-color var(--transition);
+}
+
+.switch input:checked + .switch__track {
+	border-color: var(--accent);
+	background: rgba(69, 195, 255, 0.14);
+}
+
+.switch input:checked + .switch__track::after {
+	transform: translateX(20px);
+	background: var(--accent);
+}
+
+.switch input:focus-visible + .switch__track {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}

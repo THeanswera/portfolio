@@ -72,3 +72,30 @@ jobs:
 
       - name: Проверка в браузере на 360, 768 и 1440
         run: node scripts/check.mjs
+
+  kitstroy:
+    name: Тема «КИТ-Строй.Москва»
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kitstroy-moscow
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Сборка стилей и скриптов
+        run: node build.mjs
+
+      - name: Проверка кодировки исходников
+        run: node ../portfolio-site/scripts/check-mojibake.mjs . php,scss,css,js,mjs,md
+
+      - name: Проверка, что dist не разошёлся с исходниками
+        run: |
+          git diff --exit-code -- assets/dist || {
+            echo "assets/dist отличается от собранного: запустите node build.mjs и закоммитьте."
+            exit 1
+          }

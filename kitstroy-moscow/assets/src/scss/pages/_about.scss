@@ -1,0 +1,36 @@
+// Раздел «О компании» на отдельной странице.
+
+.about-page {
+	display: grid;
+	gap: clamp(24px, 3vw, 44px);
+}
+
+.about-page__intro {
+	display: grid;
+	gap: 16px;
+	max-width: 74ch;
+}
+
+.about-page__grid {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.about-page__grid > * {
+	padding: clamp(20px, 2.6vw, 28px);
+	background: var(--bg-2);
+}
+
+.about-page__grid h3 {
+	margin-bottom: 10px;
+	font-size: 1.05rem;
+}
+
+.about-page__grid p,
+.about-page__grid li {
+	font-size: 0.92rem;
+	color: var(--fg-soft);
+}

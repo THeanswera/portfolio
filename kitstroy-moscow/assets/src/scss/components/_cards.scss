@@ -1,0 +1,250 @@
+// Карточки: панель с тонкой рамкой, засечками и подсветкой при наведении.
+
+.card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 24px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: linear-gradient(180deg, rgba(21, 29, 41, 0.9), rgba(13, 17, 23, 0.9));
+	transition:
+		border-color var(--transition),
+		transform var(--transition),
+		box-shadow var(--transition);
+}
+
+.card:hover {
+	border-color: rgba(69, 195, 255, 0.45);
+	transform: translateY(-3px);
+	box-shadow: var(--shadow-sm);
+}
+
+.card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.card__index {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.14em;
+	color: var(--accent);
+}
+
+.card__title {
+	font-size: 1.15rem;
+}
+
+.card__text {
+	font-size: 0.94rem;
+	line-height: 1.6;
+	color: var(--fg-soft);
+}
+
+.card__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: auto;
+	padding-top: 6px;
+}
+
+.card__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-family: var(--font-mono);
+	font-size: 0.76rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+
+.card__link::after {
+	content: "→";
+	transition: transform var(--transition);
+}
+
+.card__link:hover::after {
+	transform: translateX(4px);
+}
+
+// Иконка системы: пиктограмма, нарисованная кодом
+.card__icon {
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	border: 1px solid rgba(69, 195, 255, 0.3);
+	border-radius: var(--radius-xs);
+	background: rgba(69, 195, 255, 0.08);
+	color: var(--accent);
+}
+
+// Сетки карточек
+.card-grid {
+	display: grid;
+	gap: 18px;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.card-grid--wide {
+	grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+}
+
+// Карточка объекта: чертёж-превью, метаданные, спецификация
+.project-card {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--panel);
+	overflow: hidden;
+	transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.project-card:hover {
+	border-color: rgba(69, 195, 255, 0.45);
+	transform: translateY(-3px);
+	box-shadow: var(--shadow-sm);
+}
+
+.project-card__media {
+	position: relative;
+	aspect-ratio: 16 / 10;
+	background: var(--bg-2);
+	border-bottom: 1px solid var(--line);
+	overflow: hidden;
+}
+
+.project-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.project-card__badge {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	padding: 5px 9px;
+	border: 1px solid rgba(69, 195, 255, 0.4);
+	border-radius: var(--radius-xs);
+	background: rgba(6, 18, 27, 0.82);
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+
+.project-card__body {
+	display: grid;
+	gap: 12px;
+	padding: 22px;
+}
+
+.project-card__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.project-card__title {
+	font-size: 1.2rem;
+}
+
+.project-card__text {
+	font-size: 0.92rem;
+	line-height: 1.6;
+	color: var(--fg-soft);
+}
+
+.project-card__specs {
+	display: grid;
+	gap: 8px;
+	margin-top: 4px;
+	padding-top: 14px;
+	border-top: 1px solid var(--line-soft);
+}
+
+.project-card__spec {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 0.84rem;
+	color: var(--fg-soft);
+}
+
+.project-card__spec span:last-child {
+	font-family: var(--font-mono);
+	color: var(--fg);
+}
+
+// Строка объекта в списке
+.project-row {
+	display: grid;
+	gap: 10px;
+	padding: 22px 0;
+	border-bottom: 1px solid var(--line);
+	transition: border-color var(--transition);
+}
+
+.project-row:hover {
+	border-color: var(--accent);
+}
+
+.project-row__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.project-row__title {
+	font-family: var(--font-heading);
+	font-size: clamp(1.1rem, 2vw, 1.5rem);
+	font-weight: 600;
+}
+
+.project-row__text {
+	max-width: 78ch;
+	font-size: 0.94rem;
+	color: var(--fg-soft);
+}
+
+// Плитка цифры
+.stat {
+	display: grid;
+	gap: 6px;
+	padding: 20px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	background: rgba(21, 29, 41, 0.7);
+}
+
+.stat strong {
+	font-family: var(--font-heading);
+	font-size: clamp(1.6rem, 3vw, 2.4rem);
+	font-weight: 700;
+	color: var(--accent);
+}
+
+.stat span {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--muted);
+}

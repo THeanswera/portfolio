@@ -1,0 +1,361 @@
+// Калькулятор стоимости: параметры слева, живая смета справа.
+
+.calculator {
+	display: grid;
+	gap: clamp(20px, 3vw, 32px);
+	align-items: start;
+}
+
+.calculator__intro {
+	max-width: 44ch;
+}
+
+.calculator__controls {
+	display: grid;
+	gap: 22px;
+}
+
+.calculator__group {
+	display: grid;
+	gap: 10px;
+	padding: 18px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: rgba(21, 29, 41, 0.6);
+}
+
+.calculator__legend {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.calculator__row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.calculator__value {
+	font-size: 0.95rem;
+	color: var(--accent);
+}
+
+.calculator__options {
+	display: grid;
+	gap: 8px;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.calculator__option {
+	position: relative;
+	display: flex;
+	gap: 10px;
+	padding: 12px 14px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	background: var(--bg-2);
+	cursor: pointer;
+	transition: border-color var(--transition), background-color var(--transition);
+}
+
+.calculator__option:hover {
+	border-color: rgba(69, 195, 255, 0.4);
+}
+
+.calculator__option input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.calculator__option-body {
+	display: grid;
+	gap: 4px;
+}
+
+.calculator__option-body strong {
+	font-size: 0.95rem;
+}
+
+.calculator__option-body small {
+	font-size: 0.76rem;
+	line-height: 1.45;
+	color: var(--muted);
+}
+
+.calculator__option-rate {
+	color: var(--accent);
+}
+
+.calculator__option:has(input:checked) {
+	border-color: var(--accent);
+	background: rgba(69, 195, 255, 0.08);
+}
+
+.calculator__option:has(input:focus-visible) {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
+// Ползунок: дорожка и бегунок в цвете схемы
+.calculator__range {
+	width: 100%;
+	height: 26px;
+	margin: 0;
+	background: transparent;
+	appearance: none;
+}
+
+.calculator__range::-webkit-slider-runnable-track {
+	height: 4px;
+	border-radius: 2px;
+	background: linear-gradient(90deg, var(--accent), rgba(69, 195, 255, 0.25));
+}
+
+.calculator__range::-webkit-slider-thumb {
+	width: 18px;
+	height: 18px;
+	margin-top: -7px;
+	border: 2px solid var(--bg);
+	border-radius: 50%;
+	background: var(--accent);
+	appearance: none;
+	cursor: pointer;
+	box-shadow: 0 0 0 3px rgba(69, 195, 255, 0.2);
+}
+
+.calculator__range::-moz-range-track {
+	height: 4px;
+	border-radius: 2px;
+	background: rgba(69, 195, 255, 0.3);
+}
+
+.calculator__range::-moz-range-thumb {
+	width: 16px;
+	height: 16px;
+	border: 2px solid var(--bg);
+	border-radius: 50%;
+	background: var(--accent);
+	cursor: pointer;
+}
+
+.calculator__range:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 4px;
+}
+
+.calculator__scale {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.68rem;
+	color: var(--dim);
+}
+
+.calculator__systems {
+	display: grid;
+	gap: 8px;
+}
+
+.calculator__system {
+	position: relative;
+	display: flex;
+	gap: 12px;
+	padding: 12px 14px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	background: var(--bg-2);
+	cursor: pointer;
+	transition: border-color var(--transition), background-color var(--transition);
+}
+
+.calculator__system input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.calculator__system-body {
+	display: grid;
+	gap: 5px;
+}
+
+.calculator__system-head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 10px;
+	align-items: baseline;
+}
+
+.calculator__system-head strong {
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	letter-spacing: 0.08em;
+	color: var(--accent);
+}
+
+.calculator__system-head .tech {
+	font-size: 0.8rem;
+	color: var(--fg);
+}
+
+.calculator__system small {
+	font-size: 0.78rem;
+	line-height: 1.45;
+	color: var(--muted);
+}
+
+.calculator__system:has(input:checked) {
+	border-color: var(--accent);
+	background: rgba(69, 195, 255, 0.07);
+}
+
+.calculator__system:has(input:focus-visible) {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
+.calculator__system::before {
+	content: "";
+	flex: none;
+	width: 18px;
+	height: 18px;
+	margin-top: 2px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	background: var(--bg);
+}
+
+.calculator__system:has(input:checked)::before {
+	border-color: var(--accent);
+	background:
+		linear-gradient(135deg, transparent 42%, var(--accent-ink) 42%, var(--accent-ink) 58%, transparent 58%),
+		var(--accent);
+}
+
+.calculator__select {
+	width: 100%;
+	padding: 12px 14px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	background: var(--bg-2);
+	color: var(--fg);
+}
+
+.calculator__hint {
+	font-size: 0.72rem;
+	color: var(--dim);
+}
+
+// --- Результат ------------------------------------------------------------
+
+.calculator__result {
+	display: grid;
+	gap: 16px;
+	align-content: start;
+	padding: clamp(20px, 2.6vw, 28px);
+	border: 1px solid var(--accent);
+	border-radius: var(--radius-sm);
+	background: linear-gradient(180deg, rgba(69, 195, 255, 0.08), rgba(13, 17, 23, 0.6));
+	box-shadow: var(--shadow-hard);
+}
+
+.calculator__result-head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.calculator__total {
+	font-family: var(--font-heading);
+	font-size: clamp(2rem, 4vw, 3rem);
+	font-weight: 700;
+	line-height: 1;
+	color: var(--fg);
+}
+
+.calculator__spread {
+	font-size: 0.8rem;
+	color: var(--muted);
+}
+
+.calculator__lines {
+	display: grid;
+	gap: 8px;
+	padding: 14px 0;
+	border-top: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+}
+
+.calculator__line {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	justify-content: space-between;
+	font-size: 0.9rem;
+	color: var(--fg-soft);
+}
+
+.calculator__line span:last-child {
+	color: var(--fg);
+}
+
+.calculator__facts {
+	display: grid;
+	gap: 10px;
+}
+
+.calculator__facts > div {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	justify-content: space-between;
+	align-items: baseline;
+}
+
+.calculator__facts dt {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.calculator__facts dd {
+	margin: 0;
+	font-size: 0.95rem;
+	color: var(--fg);
+}
+
+.calculator__note {
+	font-size: 0.72rem;
+	line-height: 1.5;
+	color: var(--dim);
+}
+
+@media (min-width: 1024px) {
+	.calculator {
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+	}
+
+	.calculator__result {
+		position: sticky;
+		top: 96px;
+	}
+}
+
+// Квиз использует те же контролы: подчищаем отступы внутри шага
+.quiz__area {
+	margin-top: 18px;
+}
+
+.quiz__options.is-error {
+	outline: 1px solid rgba(255, 107, 94, 0.6);
+	outline-offset: 6px;
+}

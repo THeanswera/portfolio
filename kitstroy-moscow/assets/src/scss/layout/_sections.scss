@@ -1,0 +1,51 @@
+.section-title {
+	max-width: 760px;
+	margin-bottom: 34px;
+}
+
+.section-title--center {
+	margin-inline: auto;
+	text-align: center;
+}
+
+.section-title__kicker {
+	margin-bottom: 12px;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--accent);
+}
+
+.section-title__subtitle {
+	margin-top: 18px;
+}
+
+.section__footer-actions {
+	display: flex;
+	justify-content: flex-start;
+	margin-top: 28px;
+}
+
+.archive-header {
+	margin-bottom: 34px;
+}
+
+// Внутренние блоки страниц: разделительная линия вместо пустого отступа
+.content-block {
+	display: grid;
+	gap: 14px;
+	padding-top: 22px;
+	border-top: 1px solid var(--line);
+}
+
+.content-block h2 {
+	font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+}
+
+.entry-content {
+	display: grid;
+	gap: 14px;
+	color: var(--fg-soft);
+}

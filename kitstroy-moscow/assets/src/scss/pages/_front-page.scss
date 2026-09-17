@@ -1,0 +1,506 @@
+// Главная: первый экран, схема, обещания, этапы, документы, о компании.
+
+// --- Первый экран ---------------------------------------------------------
+
+.hero {
+	position: relative;
+	padding: clamp(48px, 6vw, 84px) 0 0;
+	overflow: hidden;
+}
+
+.hero::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+.hero__inner {
+	display: grid;
+	gap: clamp(28px, 4vw, 56px);
+	align-items: center;
+}
+
+.hero__content {
+	display: grid;
+	gap: 22px;
+	align-content: start;
+}
+
+.hero__title {
+	max-width: 20ch;
+}
+
+.hero__title-accent {
+	display: block;
+	color: var(--accent);
+}
+
+.hero__lead {
+	max-width: 56ch;
+}
+
+.hero__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.hero__contacts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 18px;
+	align-items: baseline;
+	padding-top: 18px;
+	border-top: 1px solid var(--line);
+}
+
+.hero__phone {
+	font-family: var(--font-mono);
+	font-size: 1.05rem;
+	color: var(--fg);
+}
+
+.hero__phone:hover {
+	color: var(--accent);
+}
+
+.hero__facts {
+	display: grid;
+	gap: 1px;
+	margin-top: clamp(36px, 5vw, 64px);
+	border-top: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.hero__fact {
+	display: grid;
+	gap: 4px;
+	padding: 20px 18px;
+	background: var(--bg);
+}
+
+.hero__fact strong {
+	font-family: var(--font-heading);
+	font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+	color: var(--accent);
+}
+
+.hero__fact span {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+@media (min-width: 1024px) {
+	.hero__inner {
+		grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+	}
+}
+
+// --- Однолинейная схема ---------------------------------------------------
+
+.diagram {
+	display: grid;
+	gap: 16px;
+	margin: 0;
+	padding: 18px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: linear-gradient(180deg, rgba(21, 29, 41, 0.94), rgba(13, 17, 23, 0.94));
+}
+
+.diagram__caption {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 14px;
+	align-items: baseline;
+	justify-content: space-between;
+	padding-bottom: 14px;
+	border-bottom: 1px solid var(--line-soft);
+	font-family: var(--font-heading);
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+.diagram__canvas {
+	position: relative;
+}
+
+.diagram__svg {
+	width: 100%;
+	height: auto;
+}
+
+.diagram__wire {
+	fill: none;
+	stroke-width: 2;
+}
+
+.diagram__line path {
+	fill: none;
+	stroke-width: 2;
+	stroke-linecap: round;
+	transition: opacity var(--transition), stroke-width var(--transition);
+}
+
+.diagram__line.is-off {
+	opacity: 0.18;
+}
+
+.diagram__line.is-hot path {
+	stroke-width: 3.5;
+}
+
+.diagram__panel {
+	fill: rgba(69, 195, 255, 0.06);
+	stroke: var(--accent);
+	stroke-width: 1.5;
+}
+
+.diagram__bus {
+	fill: none;
+	stroke: var(--fg-soft);
+	stroke-width: 2;
+}
+
+.diagram__breaker {
+	fill: none;
+	stroke: var(--muted);
+	stroke-width: 1.5;
+}
+
+.diagram__ground {
+	fill: none;
+	stroke: var(--muted);
+	stroke-width: 1.5;
+}
+
+.diagram__arrow {
+	fill: none;
+	stroke: var(--wire);
+	stroke-width: 2;
+}
+
+.diagram__tag {
+	position: absolute;
+	display: grid;
+	gap: 2px;
+	padding: 6px 9px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	background: rgba(6, 18, 27, 0.9);
+}
+
+.diagram__tag-name {
+	font-family: var(--font-heading);
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--accent);
+}
+
+.diagram__tag--in {
+	left: 0;
+	top: 22%;
+}
+
+.diagram__tag--panel {
+	left: 17%;
+	top: 6%;
+}
+
+.diagram__legend {
+	display: grid;
+	gap: 8px;
+	padding-top: 14px;
+	border-top: 1px solid var(--line-soft);
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.diagram__legend-item {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	padding: 6px 0;
+	transition: opacity var(--transition);
+}
+
+.diagram__legend-item.is-off {
+	opacity: 0.4;
+}
+
+.diagram__dot {
+	flex: none;
+	width: 10px;
+	height: 10px;
+	margin-top: 6px;
+	border-radius: 50%;
+	background: var(--dot, var(--accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot, var(--accent)) 18%, transparent);
+}
+
+.diagram__legend-text {
+	display: grid;
+	gap: 2px;
+	font-size: 0.88rem;
+	color: var(--fg);
+}
+
+.diagram__legend-text small {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	color: var(--muted);
+}
+
+// --- Обещания -------------------------------------------------------------
+
+.guarantees {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.guarantee {
+	display: grid;
+	gap: 12px;
+	align-content: start;
+	padding: clamp(20px, 2.6vw, 30px);
+	background: var(--bg-2);
+}
+
+.guarantee__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.guarantee__index {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.14em;
+	color: var(--accent);
+}
+
+.guarantee__mark {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border: 1px solid rgba(69, 195, 255, 0.35);
+	border-radius: var(--radius-xs);
+	font-size: 0.95rem;
+	color: var(--accent);
+}
+
+.guarantee h3 {
+	font-size: 1.08rem;
+}
+
+.guarantee p {
+	font-size: 0.92rem;
+	line-height: 1.6;
+	color: var(--fg-soft);
+}
+
+.guarantees__intro,
+.services-section__intro,
+.portfolio-section__intro,
+.workflow-section__intro {
+	max-width: 46ch;
+}
+
+// --- Этапы работы ---------------------------------------------------------
+
+.timeline {
+	position: relative;
+	display: grid;
+	gap: 0;
+	border-top: 1px solid var(--line);
+}
+
+.timeline__item {
+	position: relative;
+	display: grid;
+	grid-template-columns: 56px minmax(0, 1fr);
+	gap: 18px;
+	padding: 26px 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.timeline__item::before {
+	content: "";
+	position: absolute;
+	left: 27px;
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	background: var(--line-soft);
+}
+
+.timeline__index {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: 54px;
+	height: 32px;
+	border: 1px solid rgba(69, 195, 255, 0.4);
+	border-radius: var(--radius-xs);
+	background: var(--bg);
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--accent);
+}
+
+.timeline__body {
+	display: grid;
+	gap: 10px;
+}
+
+.timeline__head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 16px;
+	align-items: center;
+}
+
+.timeline__head h3 {
+	font-size: 1.2rem;
+}
+
+.timeline__body > p {
+	max-width: 74ch;
+	font-size: 0.95rem;
+	color: var(--fg-soft);
+}
+
+.timeline__meta {
+	display: grid;
+	gap: 6px 24px;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.timeline__meta dt {
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.timeline__meta dd {
+	margin: 4px 0 0;
+	font-size: 0.92rem;
+	color: var(--fg);
+}
+
+// --- Документы ------------------------------------------------------------
+
+.documents {
+	display: grid;
+	gap: clamp(24px, 3vw, 48px);
+}
+
+.documents__intro {
+	display: grid;
+	gap: 16px;
+	align-content: start;
+	max-width: 62ch;
+}
+
+.documents__list {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+}
+
+.document {
+	display: grid;
+	grid-template-columns: 46px minmax(0, 1fr);
+	gap: 16px;
+	padding: 20px;
+	background: var(--bg-2);
+}
+
+.document__index {
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--accent);
+}
+
+.document__head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 14px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.document__head h3 {
+	font-size: 1.05rem;
+}
+
+.document p {
+	font-size: 0.92rem;
+	color: var(--fg-soft);
+}
+
+@media (min-width: 1024px) {
+	.documents {
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+	}
+}
+
+// --- О компании -----------------------------------------------------------
+
+.about-company {
+	display: grid;
+	gap: clamp(24px, 3vw, 48px);
+}
+
+.about-company__content {
+	display: grid;
+	gap: 18px;
+	align-content: start;
+}
+
+.about-company__principles {
+	display: grid;
+	gap: 10px;
+}
+
+.about-company__principles li {
+	position: relative;
+	padding-left: 26px;
+	font-size: 0.95rem;
+	color: var(--fg-soft);
+}
+
+.about-company__principles li::before {
+	content: "—";
+	position: absolute;
+	left: 0;
+	color: var(--accent);
+}
+
+.about-company__stats {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+@media (min-width: 1024px) {
+	.about-company {
+		grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+	}
+}

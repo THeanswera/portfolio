@@ -1,0 +1,565 @@
+// Заголовок страницы, спецификации, контентные блоки и служебные элементы.
+
+.page-head {
+	position: relative;
+	padding: clamp(36px, 5vw, 64px) 0 clamp(24px, 3vw, 40px);
+	border-bottom: 1px solid var(--line);
+}
+
+.page-head h1 {
+	max-width: 26ch;
+	margin: 14px 0 18px;
+}
+
+.page-head .lead {
+	max-width: 70ch;
+}
+
+// --- Сетка технических данных объекта -------------------------------------
+
+.spec-grid {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.spec-grid__item {
+	display: grid;
+	gap: 6px;
+	padding: 18px;
+	background: var(--bg);
+}
+
+.spec-grid__item dt {
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.spec-grid__item dd {
+	margin: 0;
+	font-family: var(--font-heading);
+	font-size: 1.02rem;
+	font-weight: 600;
+	color: var(--fg);
+}
+
+.spec-grid__item--accent {
+	background: rgba(69, 195, 255, 0.07);
+}
+
+.spec-grid__item--accent dd {
+	color: var(--accent);
+}
+
+// --- Объект: обложка -------------------------------------------------------
+
+.project-hero {
+	display: grid;
+	gap: clamp(24px, 3vw, 44px);
+	align-items: center;
+}
+
+.project-hero__content {
+	display: grid;
+	gap: 18px;
+	align-content: start;
+}
+
+.project-hero__tags {
+	margin-top: 4px;
+}
+
+.project-hero__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.project-hero__media {
+	margin: 0;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--panel);
+	overflow: hidden;
+}
+
+.project-hero__media img {
+	width: 100%;
+	aspect-ratio: 16 / 10;
+	object-fit: cover;
+}
+
+.project-hero__media figcaption {
+	padding: 12px 16px;
+	border-top: 1px solid var(--line);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--muted);
+}
+
+@media (min-width: 1024px) {
+	.project-hero {
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+	}
+}
+
+// --- История объекта и услуги ---------------------------------------------
+
+.project-story,
+.service-single__main {
+	display: grid;
+	gap: clamp(22px, 3vw, 36px);
+	max-width: 78ch;
+}
+
+.content-block {
+	display: grid;
+	gap: 14px;
+	padding-top: 22px;
+	border-top: 1px solid var(--line);
+}
+
+.content-block h2 {
+	font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+}
+
+.entry-content {
+	display: grid;
+	gap: 14px;
+	color: var(--fg-soft);
+}
+
+.entry-content a {
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.service-single__lead {
+	max-width: 74ch;
+	color: var(--fg-soft);
+}
+
+.service-single__content {
+	display: grid;
+	gap: clamp(24px, 3vw, 44px);
+	align-items: start;
+}
+
+.service-single__sidebar {
+	display: grid;
+	gap: 18px;
+	align-content: start;
+}
+
+.cta-panel {
+	display: grid;
+	gap: 14px;
+}
+
+.cta-panel h2 {
+	font-size: 1.3rem;
+}
+
+.cta-panel p {
+	font-size: 0.94rem;
+	color: var(--fg-soft);
+}
+
+.cta-panel__note {
+	font-size: 0.72rem;
+	color: var(--dim);
+}
+
+.stage-list {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+}
+
+.stage-list li {
+	display: flex;
+	gap: 14px;
+	align-items: baseline;
+	padding: 14px 16px;
+	background: var(--bg-2);
+	font-size: 0.94rem;
+	color: var(--fg-soft);
+}
+
+.stage-list__num {
+	font-family: var(--font-mono);
+	font-size: 0.74rem;
+	color: var(--accent);
+}
+
+@media (min-width: 1024px) {
+	.service-single__content {
+		grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+	}
+
+	.service-single__sidebar {
+		position: sticky;
+		top: 96px;
+	}
+}
+
+// --- Частые вопросы -------------------------------------------------------
+
+.faq {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+}
+
+.faq__item {
+	background: var(--bg-2);
+}
+
+.faq__item summary {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	justify-content: space-between;
+	padding: 18px 20px;
+	font-family: var(--font-heading);
+	font-size: 1.02rem;
+	font-weight: 600;
+	color: var(--fg);
+	cursor: pointer;
+	list-style: none;
+}
+
+.faq__item summary::-webkit-details-marker {
+	display: none;
+}
+
+.faq__item summary:hover {
+	color: var(--accent);
+}
+
+.faq__mark {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	font-family: var(--font-mono);
+	color: var(--accent);
+	transition: transform var(--transition), background-color var(--transition);
+}
+
+.faq__item[open] .faq__mark {
+	transform: rotate(45deg);
+	background: rgba(69, 195, 255, 0.14);
+}
+
+.faq__item p,
+.faq__answer {
+	padding: 0 20px 20px;
+	font-size: 0.94rem;
+	line-height: 1.65;
+	color: var(--fg-soft);
+}
+
+.faq-section__intro,
+.contacts-section__intro {
+	max-width: 46ch;
+}
+
+// --- Открытая формула -----------------------------------------------------
+
+.formula {
+	display: grid;
+	gap: clamp(22px, 3vw, 44px);
+}
+
+.formula__intro {
+	display: grid;
+	gap: 14px;
+	align-content: start;
+	max-width: 60ch;
+}
+
+.formula__steps {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+}
+
+.formula__steps li {
+	display: grid;
+	grid-template-columns: 50px minmax(0, 1fr);
+	gap: 16px;
+	padding: 20px;
+	background: var(--bg-2);
+}
+
+.formula__steps h3 {
+	font-size: 1.02rem;
+	margin-bottom: 8px;
+}
+
+.formula__steps p {
+	font-size: 0.92rem;
+	color: var(--fg-soft);
+}
+
+.formula__num {
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--accent);
+}
+
+@media (min-width: 1024px) {
+	.formula {
+		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+	}
+}
+
+// --- Правила работы -------------------------------------------------------
+
+.rules {
+	display: grid;
+	gap: clamp(22px, 3vw, 40px);
+}
+
+.rules__intro {
+	display: grid;
+	gap: 14px;
+	max-width: 62ch;
+}
+
+.rules__grid {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.rules__column {
+	display: grid;
+	gap: 14px;
+	align-content: start;
+	padding: clamp(20px, 2.6vw, 28px);
+	background: var(--bg-2);
+}
+
+.rules__column h3 {
+	font-size: 1.05rem;
+}
+
+.rules__column--muted {
+	background: var(--bg);
+}
+
+.feature-list {
+	display: grid;
+	gap: 10px;
+}
+
+.feature-list li {
+	position: relative;
+	padding-left: 26px;
+	font-size: 0.94rem;
+	line-height: 1.6;
+	color: var(--fg-soft);
+}
+
+.feature-list li::before {
+	content: "—";
+	position: absolute;
+	left: 0;
+	color: var(--muted);
+}
+
+.feature-list--accent li::before {
+	content: "✓";
+	color: var(--accent);
+}
+
+// --- Галерея --------------------------------------------------------------
+
+.gallery-grid {
+	display: grid;
+	gap: 14px;
+	margin-top: clamp(22px, 3vw, 36px);
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.gallery-grid__item {
+	margin: 0;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	overflow: hidden;
+}
+
+.gallery-grid__item img {
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+}
+
+// --- Служебные страницы ---------------------------------------------------
+
+.page-narrow {
+	max-width: 820px;
+}
+
+.page-narrow h1 {
+	max-width: none;
+}
+
+// --- Контакты -------------------------------------------------------------
+
+.contacts-layout {
+	display: grid;
+	gap: clamp(22px, 3vw, 40px);
+	align-items: start;
+}
+
+.contacts-layout__info {
+	display: grid;
+	gap: 16px;
+}
+
+.contacts-cards {
+	display: grid;
+	gap: 1px;
+	border: 1px solid var(--line);
+	background: var(--line);
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.contacts-card {
+	display: grid;
+	gap: 6px;
+	align-content: start;
+	padding: 20px;
+	background: var(--bg-2);
+}
+
+.contacts-card__label {
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+
+.contacts-card__value {
+	font-family: var(--font-heading);
+	font-size: 1.02rem;
+	font-weight: 600;
+	color: var(--fg);
+}
+
+.contacts-card__value:hover {
+	color: var(--accent);
+}
+
+.contacts-card__route {
+	font-family: var(--font-mono);
+	font-size: 0.76rem;
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.contacts-card--requisites ul {
+	display: grid;
+	gap: 4px;
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--muted);
+}
+
+.contacts-layout__map {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-height: 320px;
+}
+
+.contacts-layout__map iframe {
+	width: 100%;
+	flex: 1 1 auto;
+	min-height: 420px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	filter: grayscale(0.35) contrast(1.05);
+}
+
+.contacts-layout__map-fallback {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	font-size: 0.84rem;
+	color: var(--muted);
+}
+
+.contacts-layout__map-fallback a {
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+	.contacts-layout {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+	}
+}
+
+// --- Список услуг и объектов ---------------------------------------------
+
+.section__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: clamp(22px, 3vw, 36px);
+}
+
+.archive-head {
+	display: grid;
+	gap: 16px;
+	max-width: 72ch;
+	margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.pagination {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 32px;
+}
+
+.pagination .page-numbers {
+	display: inline-grid;
+	place-items: center;
+	min-width: 40px;
+	height: 40px;
+	padding: 0 12px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	color: var(--fg-soft);
+}
+
+.pagination .page-numbers.current,
+.pagination .page-numbers:hover {
+	border-color: var(--accent);
+	color: var(--accent);
+}

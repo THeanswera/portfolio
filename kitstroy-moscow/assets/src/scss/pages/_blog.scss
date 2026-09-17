@@ -1,0 +1,49 @@
+// Блог: карточки статей и страница записи.
+
+.blog-grid {
+	display: grid;
+	gap: 18px;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.blog-card {
+	display: grid;
+	gap: 12px;
+	align-content: start;
+	padding: 22px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--bg-2);
+	transition: border-color var(--transition), transform var(--transition);
+}
+
+.blog-card:hover {
+	border-color: rgba(69, 195, 255, 0.45);
+	transform: translateY(-3px);
+}
+
+.blog-card__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.blog-card__title {
+	font-size: 1.1rem;
+}
+
+.blog-card__excerpt {
+	font-size: 0.92rem;
+	color: var(--fg-soft);
+}
+
+.single-post__content {
+	display: grid;
+	gap: 16px;
+	max-width: 74ch;
+}
