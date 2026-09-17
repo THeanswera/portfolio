@@ -1,19 +1,22 @@
+// Карта на странице контактов: держим пропорции и не даём вылезать за экран.
+
 .contacts-layout__map {
 	position: relative;
 	display: flex;
-	min-height: 320px;
+	min-height: 280px;
 	flex-direction: column;
 	gap: 12px;
 }
 
 .contacts-layout__map iframe {
 	width: 100%;
-	min-height: 560px;
+	max-width: 100%;
+	min-height: 320px;
 	height: 100%;
 	flex: 1 1 auto;
-	border: 0;
-	border-radius: var(--radius-lg);
-	box-shadow: var(--shadow-sm);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	filter: grayscale(0.35) contrast(1.05);
 }
 
 /* Подстраховка на случай, когда карта не отвечает: вместо пустой области
@@ -23,7 +26,7 @@
 	flex-wrap: wrap;
 	gap: 8px;
 	margin: 0;
-	font-size: 0.875rem;
+	font-size: 0.84rem;
 	color: var(--muted);
 }
 
@@ -35,5 +38,8 @@
 
 .contacts-card--requisites ul {
 	display: grid;
-	gap: 6px;
+	gap: 4px;
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--muted);
 }

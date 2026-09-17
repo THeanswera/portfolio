@@ -95,3 +95,14 @@
 		align-items: center;
 	}
 }
+
+@media (max-width: $mobile) {
+	// Три колонки на телефоне не помещаются: разворачиваем в один столбец.
+	.site-footer__inner {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.site-footer__brand {
+		max-width: none;
+	}
+}

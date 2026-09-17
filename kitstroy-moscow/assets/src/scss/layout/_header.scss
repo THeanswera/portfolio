@@ -210,3 +210,25 @@
 		min-height: 66px;
 	}
 }
+
+@media (max-width: $mobile) {
+	// Телефон в шапке не помещается вместе с логотипом и кнопкой:
+	// на телефоне связь доступна из меню и подвала.
+	.site-header__phone {
+		display: none;
+	}
+
+	.site-header__contacts {
+		gap: 10px;
+	}
+
+	.site-header__logo {
+		font-size: 0.98rem;
+	}
+
+	.site-header__logo-mark {
+		width: 36px;
+		height: 36px;
+		font-size: 0.74rem;
+	}
+}
