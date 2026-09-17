@@ -275,7 +275,7 @@ export function CasePage() {
             )}
 
             {work.screens && work.screens.length > 0 && (
-              <section className="section bg-paper-2">
+              <section className="section section-tight bg-paper-2">
                 <div className="container-x">
                   <Reveal>
                     <p className="label-mono">Экраны</p>
@@ -305,7 +305,7 @@ export function CasePage() {
             )}
 
             {work.offers && (
-              <section className="section">
+              <section className="section section-tight section-join">
                 <div className="container-x">
                   <Reveal>
                     <p className="label-mono">Что из этого можно заказать</p>
@@ -344,7 +344,7 @@ export function CasePage() {
               </section>
             )}
 
-            <section className="section bg-paper-2" id="case-lead">
+            <section className="section section-tight" id="case-lead">
               <div className="container-x grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
                 <Reveal>
                   <p className="label-mono">Заявка</p>
@@ -370,7 +370,7 @@ export function CasePage() {
               </div>
             </section>
 
-            <section className="section">
+            <section className="section section-tight section-join">
               <div className="container-x">
                 <p className="label-mono">Другие работы</p>
                 <ul className="mt-6">

@@ -1,4 +1,5 @@
-// Поиск испорченной кодировки (двойное перекодирование UTF-8 → CP1251).
+// Поиск испорченной кодировки: двойное перекодирование UTF-8 → CP1251 и
+// символы-замены U+FFFD, которые появляются, когда байты кириллицы теряются.
 // Запуск: node scripts/check-mojibake.mjs <папка> [расширения через запятую]
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -12,6 +13,8 @@ if (!dirArg) {
 const root = path.resolve(dirArg);
 const extensions = new Set(extArg.split(',').map((value) => `.${value.trim().replace(/^\./, '')}`));
 const markers = ['Р°', 'Рµ', 'РЅ', 'Рѕ', 'СЃ', 'С‚', 'Р»', 'Рё', 'РІ', 'РЎ', 'РЇ', 'С‡'];
+/** U+FFFD — символ-замена: текст уже потерян, файл нужно править руками. */
+const REPLACEMENT = '\uFFFD';
 
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -19,7 +22,7 @@ async function walk(dir) {
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === '.git') continue;
+      if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist') continue;
       files.push(...(await walk(full)));
     } else if (extensions.has(path.extname(entry.name))) {
       files.push(full);
@@ -30,16 +33,28 @@ async function walk(dir) {
 
 const files = await walk(root);
 let corrupted = 0;
+let broken = 0;
 
 for (const file of files) {
   const text = await readFile(file, 'utf8');
   let hits = 0;
   for (const marker of markers) hits += text.split(marker).length - 1;
-  const verdict = hits > 50 ? 'ИСПОРЧЕН' : hits > 5 ? 'проверить' : 'ок';
+
+  const lines = text.split('\n');
+  const damaged = [];
+  lines.forEach((line, index) => {
+    if (line.includes(REPLACEMENT)) damaged.push(`строка ${index + 1}: ${line.trim().slice(0, 100)}`);
+  });
+
+  const verdict = damaged.length > 0 ? 'ПОТЕРЯН ТЕКСТ' : hits > 50 ? 'ИСПОРЧЕН' : hits > 5 ? 'проверить' : 'ок';
   if (hits > 50) corrupted += 1;
+  if (damaged.length > 0) broken += 1;
+
   console.log(
-    `${verdict.padEnd(9)} ${String(hits).padStart(6)}  ${path.relative(root, file)}  (${(await stat(file)).size} Б)`,
+    `${verdict.padEnd(13)} ${String(hits).padStart(6)}  ${path.relative(root, file)}  (${(await stat(file)).size} Б)`,
   );
+  damaged.slice(0, 5).forEach((line) => console.log(`              ${line}`));
 }
 
-console.log(`\nВсего файлов: ${files.length}, испорченных: ${corrupted}`);
+console.log(`\nВсего файлов: ${files.length}, испорченных кодировкой: ${corrupted}, с потерянным текстом: ${broken}`);
+process.exitCode = corrupted + broken > 0 ? 1 : 0;

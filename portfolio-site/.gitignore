@@ -5,6 +5,11 @@ dist/
 .tmp-check-profile/
 .tmp-live/
 .tmp-live-profile/
+.tmp-audit/
+.tmp-audit-profile/
+.tmp-live-audit-profile/
+.tmp-case-shots/
+.tmp-slices-*/
 .backup/
 *.log
 .DS_Store

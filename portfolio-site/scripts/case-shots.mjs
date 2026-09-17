@@ -1,12 +1,18 @@
 // Полные скриншоты страниц для кейсов: высокие кадры, которые прокручиваются
 // в рамке браузера, и отдельные экраны для разбора.
 // Запуск: node scripts/case-shots.mjs [--only forma]
+//
+// Важно: перед снимком страница прокручивается целиком и блоки, которые появляются
+// при скролле, раскрываются принудительно. Иначе высокий кадр снимается до появления
+// секций и на нём остаются пустые однотонные полосы вместо контента.
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import sharp from 'sharp';
+import { SCROLL_THROUGH, REVEAL_ALL } from './lib/audit.mjs';
+import { findFlatBands, emptyShare } from './lib/image-bands.mjs';
 
 const CHROME_CANDIDATES = [
   process.env.CHROME_PATH,
@@ -37,17 +43,28 @@ const TARGETS = [
   { id: 'forma', url: FORMA, wait: 3200 },
   { id: 'kitstroy', url: 'https://rootlost.ru/', wait: 3200 },
   { id: 'technoremont', url: 'https://rootlost.online/remont/', wait: 2600 },
-  { id: 'sincere', url: 'https://sincere-family.ru/', wait: 3200 },
+  // Первый экран Sincere закреплён на всю высоту окна и не сообщает реальную высоту
+  // документа: снимаем в окно повыше, иначе в кадре оказывается только шапка.
+  { id: 'sincere', url: 'https://sincere-family.ru/', wait: 3200, heightScale: 1.6 },
   { id: 'sertexity', url: pathToFileURL(path.join(localRoot, '0_verstka_po_maketu/index.html')).href, wait: 2600 },
 ];
 
-/** Дополнительные экраны для разбора кейса «Форма». */
+/** Дополнительные экраны для разбора кейсов. */
 const EXTRA = [
   { id: 'forma', out: 'forma.webp', width: 1440, height: 900, url: FORMA },
   { id: 'forma', out: 'forma-configurator.webp', width: 1440, height: 1180, url: `${FORMA}configurator/` },
   { id: 'forma', out: 'forma-project.webp', width: 1440, height: 1000, url: `${FORMA}projects/kuhnya-s-ostrovom-v-barvihe/` },
   { id: 'forma', out: 'forma-mobile.webp', width: 390, height: 1180, url: FORMA },
+  { id: 'sincere', out: 'sincere-album.webp', width: 1440, height: 1000, url: 'https://sincere-family.ru/pidzhak_album/' },
 ];
+
+/** Полоса длиннее этого значения в готовом кадре — повод переснять страницу. */
+const BLANK_LIMIT = 320;
+/** Если пустота занимает больше этой доли высоты, кадр снят до появления блоков. */
+const EMPTY_SHARE_LIMIT = 0.6;
+/** Полосы длиннее этого значения в готовом кадре просто перечисляем: у живых сайтов
+ *  с крупными отступами такие промежутки между секциями — норма. */
+const LONG_BAND = 380;
 
 const PORT = 9337;
 const tmpDir = path.resolve('.tmp-case-shots');
@@ -117,52 +134,121 @@ function connect(wsUrl) {
   });
 }
 
-/** Убираем баннеры cookie и принудительно показываем блоки, спрятанные до скролла. */
-const PREPARE = `
+/** Убираем баннеры cookie: они перекрывают низ страницы на полном кадре. */
+const HIDE_COOKIE = `
   (() => {
     try { localStorage.setItem('forma-cookie', 'all'); localStorage.setItem('portfolio-cookie-consent', 'all'); } catch {}
-    document.querySelectorAll('[data-cookie], [data-cookie-consent], .cookie, [class*="cookie"]').forEach((el) => {
+    document.querySelectorAll('[data-cookie], [data-cookie-consent]').forEach((el) => {
       if (el.tagName !== 'BODY') el.remove();
     });
-    document.querySelectorAll('[data-reveal], .is-in, [data-part]').forEach((el) => {
-      el.classList.add('is-visible', 'is-in');
-      el.style.transitionDelay = '0ms';
-      el.style.opacity = '1';
-      el.style.transform = 'none';
-    });
-    document.querySelectorAll('.frame__shot').forEach((img) => { img.style.animation = 'none'; });
     return true;
   })()`;
 
-async function capture({ url, width, height, full, wait = 2800 }) {
+async function evaluate(client, expression) {
+  const { result, exceptionDetails } = await client.send('Runtime.evaluate', {
+    expression,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  if (exceptionDetails) throw new Error(exceptionDetails.text ?? 'Ошибка выполнения в браузере');
+  return result.value;
+}
+
+/**
+ * Готовит страницу к съёмке: прокрутка целиком, раскрытие блоков, возврат наверх.
+ * Возвращает высоту документа.
+ */
+async function preparePage(client, url, wait) {
+  await client.send('Page.enable');
+  await client.send('Page.navigate', { url });
+
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const ready = await evaluate(client, 'document.readyState');
+    if (ready === 'complete') break;
+    await sleep(200);
+  }
+
+  await sleep(wait);
+  await evaluate(client, HIDE_COOKIE);
+  await evaluate(client, SCROLL_THROUGH);
+  await evaluate(client, REVEAL_ALL);
+  await evaluate(client, 'window.scrollTo(0, 0)');
+  await sleep(1200);
+
+  const metrics = await client.send('Page.getLayoutMetrics');
+  return Math.round(metrics.cssContentSize.height);
+}
+
+async function openTarget() {
   const target = await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: 'PUT' }).then((res) =>
     res.json(),
   );
   const client = await connect(target.webSocketDebuggerUrl);
+  return { client, target };
+}
 
-  await client.send('Page.enable');
-  await client.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
-  await client.send('Page.navigate', { url });
-  await sleep(wait);
-  await client.send('Runtime.evaluate', { expression: PREPARE });
-  await sleep(600);
-
-  let clip = { x: 0, y: 0, width, height, scale: 1 };
-  if (full) {
-    const metrics = await client.send('Page.getLayoutMetrics');
-    const size = metrics.cssContentSize;
-    clip = { x: 0, y: 0, width: size.width, height: Math.min(size.height, 9000), scale: 1 };
-  }
-
-  const shot = await client.send('Page.captureScreenshot', {
-    format: 'png',
-    captureBeyondViewport: full,
-    clip,
-  });
-
+async function closeTarget(target, client) {
   client.close();
   await fetch(`http://127.0.0.1:${PORT}/json/close/${target.id}`).catch(() => {});
-  return Buffer.from(shot.data, 'base64');
+}
+
+/**
+ * Снимает полную страницу. Если пустота занимает больше половины кадра, значит
+ * блоки ещё не появились — съёмка повторяется.
+ */
+async function captureFull({ url, width, height, wait, heightScale = 1 }) {
+  const frameHeight = Math.round(height * heightScale);
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const { client, target } = await openTarget();
+    try {
+      await client.send('Emulation.setDeviceMetricsOverride', {
+        width,
+        height: frameHeight,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      const docHeight = await preparePage(client, url, wait);
+      const clip = { x: 0, y: 0, width, height: Math.min(docHeight, 20000), scale: 1 };
+      const shot = await client.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip });
+      const png = Buffer.from(shot.data, 'base64');
+      const probe = await findFlatBands(png, { minRun: BLANK_LIMIT });
+      const empty = emptyShare(probe.bands, probe.height);
+      if (empty < EMPTY_SHARE_LIMIT || attempt === 2) {
+        return { png, docHeight, bands: probe.bands, empty, attempt };
+      }
+      console.log(`  … пусто ${(empty * 100).toFixed(1)}% высоты — блоки не появились, повторная съёмка`);
+    } finally {
+      await closeTarget(target, client);
+    }
+    await sleep(800);
+  }
+  throw new Error('Не удалось снять страницу без пустых полос');
+}
+
+/**
+ * Снимок первого экрана. Высота окна берётся больше обычной и без ограничения
+ * `captureBeyondViewport`: некоторые сайты отдают всю страницу только в окно
+ * нужной высоты и не сообщают реальную высоту документа.
+ */
+async function captureViewport({ url, width, height, wait }) {
+  const tall = Math.round(height * 2.2);
+  const { client, target } = await openTarget();
+  try {
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width,
+      height: tall,
+      deviceScaleFactor: 1,
+      mobile: width < 700,
+    });
+    await preparePage(client, url, wait);
+    const shot = await client.send('Page.captureScreenshot', {
+      format: 'png',
+      clip: { x: 0, y: 0, width, height, scale: 1 },
+    });
+    return Buffer.from(shot.data, 'base64');
+  } finally {
+    await closeTarget(target, client);
+  }
 }
 
 try {
@@ -171,24 +257,61 @@ try {
   const targets = only ? TARGETS.filter((item) => item.id === only) : TARGETS;
   const extras = only ? EXTRA.filter((item) => item.id === only) : EXTRA;
 
+  let failed = 0;
+
   for (const target of targets) {
     process.stdout.write(`→ ${target.id}: полная страница\n`);
-    const png = await capture({ url: target.url, width: 1440, height: 1000, full: true, wait: target.wait });
+    const full = await captureFull({
+      url: target.url,
+      width: 1440,
+      height: 1000,
+      wait: target.wait,
+      heightScale: target.heightScale ?? 1,
+    });
     const out = path.join(outDir, `${target.id}-full.webp`);
-    await sharp(png)
+    await sharp(full.png)
       .resize({ width: 1100, withoutEnlargement: true })
       .webp({ quality: 66 })
       .toFile(out);
-    const meta = await sharp(out).metadata();
-    console.log(`  ✓ ${path.basename(out)} — ${meta.width}×${meta.height}, ${Math.round((await readFile(out)).length / 1024)} КБ`);
+
+    const webpBuffer = await readFile(out);
+    const meta = await sharp(webpBuffer).metadata();
+    const scale = (meta.width ?? 1100) / 1440;
+    const check = await findFlatBands(webpBuffer, { minRun: Math.round(LONG_BAND * scale) });
+    const empty = emptyShare(check.bands, check.height);
+
+    console.log(
+      `  ✓ ${path.basename(out)} — ${meta.width}×${meta.height}, ${Math.round(webpBuffer.length / 1024)} КБ, ` +
+        `пусто ${(empty * 100).toFixed(1)}% высоты`,
+    );
+    if (empty > EMPTY_SHARE_LIMIT) {
+      failed += 1;
+      console.log('    × пустота больше половины кадра — блоки не появились');
+    }
+    for (const band of check.bands.filter((item) => item.px >= LONG_BAND * scale).slice(0, 5)) {
+      console.log(
+        `    · промежуток ${Math.round(band.px / scale)}px от ${((band.from / check.height) * 100).toFixed(1)}% — ${band.color}`,
+      );
+    }
   }
 
   for (const item of extras) {
     process.stdout.write(`→ ${item.out}\n`);
-    const png = await capture({ url: item.url, width: item.width, height: item.height, full: false });
-    const out = path.join(outDir, item.out.replace('.webp', '.webp'));
+    const png = await captureViewport({
+      url: item.url,
+      width: item.width,
+      height: item.height,
+      wait: 2600,
+    });
+    const out = path.join(outDir, item.out);
     await sharp(png).webp({ quality: 74 }).toFile(out);
-    console.log(`  ✓ ${path.basename(out)}, ${Math.round((await readFile(out)).length / 1024)} КБ`);
+    const buffer = await readFile(out);
+    console.log(`  ✓ ${path.basename(out)}, ${Math.round(buffer.length / 1024)} КБ`);
+  }
+
+  if (failed > 0) {
+    console.error(`\nВнимание: у ${failed} полных снимков остались пустые полосы.`);
+    process.exitCode = 1;
   }
 } catch (error) {
   console.error(`\nОшибка: ${error.message}`);

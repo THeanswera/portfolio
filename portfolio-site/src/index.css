@@ -115,10 +115,26 @@
     padding-block: 76px;
   }
 
+  /* Две соседние секции с одинаковым отступом дают 240px пустоты: для страницы
+     кейса, где секций много подряд, это читается как провал. */
+  .section-tight {
+    padding-block: 58px;
+  }
+
   @media (min-width: 1024px) {
     .section {
       padding-block: 120px;
     }
+
+    .section-tight {
+      padding-block: 88px;
+    }
+  }
+
+  /* Стык двух однотипных секций подчёркиваем линейкой: пустота перестаёт
+     выглядеть случайной и становится границей раздела. */
+  .section-join {
+    border-top: 1px solid var(--color-line);
   }
 
   .label-mono {

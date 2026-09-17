@@ -1,30 +1,59 @@
 import { useEffect } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
-/** Плавное появление элементов с атрибутом data-reveal при попадании в вид. */
+/**
+ * Плавное появление элементов с атрибутом data-reveal при попадании в вид.
+ *
+ * Наблюдатель один на страницу и живёт вне React: так блоки, отрисованные позже
+ * (страница кейса, ленивые секции), всё равно получают класс is-visible. Раньше
+ * хук вызывался только в App.tsx, и на странице кейса все секции с data-reveal
+ * оставались с opacity: 0 — выглядело как пустые провалы вместо текста.
+ */
+let started = false;
+let observer: IntersectionObserver | null = null;
+
+function revealNow(node: HTMLElement) {
+  node.classList.add('is-visible');
+  observer?.unobserve(node);
+}
+
+function watch(node: Element) {
+  if (!(node instanceof HTMLElement) || !node.hasAttribute('data-reveal')) return;
+  if (observer) observer.observe(node);
+  else revealNow(node);
+}
+
+export function initReveal() {
+  if (started || typeof window === 'undefined') return;
+  started = true;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!('IntersectionObserver' in window) || reduced) {
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((node) => node.classList.add('is-visible'));
+    return;
+  }
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) revealNow(entry.target as HTMLElement);
+      });
+    },
+    { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
+  );
+
+  const scan = () => document.querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)').forEach(watch);
+  scan();
+
+  // React дорисовывает разметку после первого кадра — подхватываем новые блоки.
+  const mutations = new MutationObserver(scan);
+  mutations.observe(document.documentElement, { childList: true, subtree: true });
+}
+
 export function useRevealOnScroll() {
   useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (!('IntersectionObserver' in window) || reduced) {
-      nodes.forEach((node) => node.classList.add('is-visible'));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+    initReveal();
   }, []);
 }
 

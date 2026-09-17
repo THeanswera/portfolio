@@ -32,6 +32,9 @@ jobs:
       - name: Проверка в браузере на 360, 768 и 1440
         run: node scripts/check-responsive.mjs
 
+      - name: Визуальная проверка: появление блоков, пустые полосы, переполнение
+        run: node scripts/audit-visual.mjs
+
       - name: Кодировка и ссылки
         run: |
           node scripts/check-mojibake.mjs dist html,css,js
@@ -45,6 +48,8 @@ jobs:
           path: |
             .tmp-check/report.json
             .tmp-check/*.png
+            .tmp-audit/audit.json
+            .tmp-audit/*.png
           if-no-files-found: ignore
           retention-days: 7
 

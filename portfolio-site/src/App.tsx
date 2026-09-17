@@ -11,7 +11,7 @@ import { Process } from './components/Process';
 import { Services } from './components/Services';
 import { Works } from './components/Works';
 import { useCounters } from './lib/counters';
-import { useRevealOnScroll } from './lib/reveal';
+import { initReveal } from './lib/reveal';
 
 function readCookieChoice(): CookieChoice | null {
   try {
@@ -22,10 +22,11 @@ function readCookieChoice(): CookieChoice | null {
   }
 }
 
+initReveal();
+
 export default function App() {
   const [cookieOpen, setCookieOpen] = useState(() => readCookieChoice() === null);
 
-  useRevealOnScroll();
   useCounters();
 
   const decideCookie = (choice: CookieChoice) => {
