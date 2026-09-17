@@ -1,4 +1,4 @@
-// Скачивание папки с хостинга по FTP (резервная копия перед изменениями).
+﻿// Скачивание папки с хостинга по FTP (резервная копия перед изменениями).
 // Запуск:
 //   $env:FTP_USER='...'; $env:FTP_PASS='...'
 //   node scripts/ftp-pull.mjs <удалённая-папка> <локальная-папка> [макс. файлов]
@@ -10,6 +10,8 @@ const host = process.env.FTP_HOST ?? '31.31.196.221';
 const port = process.env.FTP_PORT ?? '21';
 const user = process.env.FTP_USER;
 const pass = process.env.FTP_PASS;
+/** curl на Windows вызывается как curl.exe, на остальных системах — как curl. */
+const CURL = process.platform === 'win32' ? 'curl.exe' : 'curl';
 const [remoteDir, localDirArg, limitArg] = process.argv.slice(2);
 const limit = limitArg ? Number(limitArg) : Infinity;
 
@@ -30,7 +32,7 @@ function ftp(args, { capture = false } = {}) {
     ...args,
   ].join('\n');
 
-  const result = spawnSync('curl.exe', ['--config', '-'], {
+  const result = spawnSync(CURL, ['--config', '-'], {
     input: config,
     encoding: 'utf8',
     stdio: capture ? ['pipe', 'pipe', 'pipe'] : ['pipe', 'inherit', 'inherit'],
@@ -71,7 +73,7 @@ async function walk(remote, local, prefix = '') {
       continue;
     }
 
-    const body = spawnSync('curl.exe', ['--config', '-'], {
+    const body = spawnSync(CURL, ['--config', '-'], {
       input: Buffer.from(
         [
           `user = "${user}:${pass}"`,

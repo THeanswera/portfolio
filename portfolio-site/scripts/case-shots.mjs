@@ -56,6 +56,9 @@ const EXTRA = [
   { id: 'forma', out: 'forma-project.webp', width: 1440, height: 1000, url: `${FORMA}projects/kuhnya-s-ostrovom-v-barvihe/` },
   { id: 'forma', out: 'forma-mobile.webp', width: 390, height: 1180, url: FORMA },
   { id: 'sincere', out: 'sincere-album.webp', width: 1440, height: 1000, url: 'https://sincere-family.ru/pidzhak_album/' },
+  { id: 'kitstroy', out: 'kitstroy.webp', width: 1440, height: 900, url: 'https://rootlost.ru/' },
+  { id: 'kitstroy', out: 'kitstroy-calculator.webp', width: 1440, height: 1000, url: 'https://rootlost.ru/calculator/' },
+  { id: 'kitstroy', out: 'kitstroy-portfolio.webp', width: 1440, height: 1000, url: 'https://rootlost.ru/portfolio/' },
 ];
 
 /** Полоса длиннее этого значения в готовом кадре — повод переснять страницу. */
