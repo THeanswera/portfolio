@@ -8,6 +8,7 @@ dist/
 .tmp-audit/
 .tmp-audit-profile/
 .tmp-live-audit-profile/
+.tmp-live-verify/
 .tmp-case-shots/
 .tmp-slices-*/
 .backup/
