@@ -1,0 +1,12 @@
+{
+  "name": "sertexity",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Sertexity — промо-сайт платформы AI-арбитража: статика, генератор страниц, глобус и калькулятор на Canvas",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node scripts/serve.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}

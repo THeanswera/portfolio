@@ -1,0 +1,52 @@
+:root {
+	/* Фон: глубокий космос с холодным подтоном */
+	--bg: #05070d;
+	--bg-2: #080b14;
+	--bg-3: #0c1120;
+	--panel: #0f1526;
+	--panel-2: #141b30;
+
+	/* Текст */
+	--fg: #eef2ff;
+	--fg-soft: #b3bcd8;
+	--muted: #7b86a6;
+	--dim: #565f7d;
+
+	/* Линии */
+	--line: #1b2338;
+	--line-2: #263049;
+	--line-soft: #141a2b;
+
+	/* Акценты: фиолетовый — сигнал, изумрудный — прибыль, янтарный — предупреждение */
+	--accent: #8b5cff;
+	--accent-2: #6d3ff0;
+	--accent-soft: rgba(139, 92, 255, 0.14);
+	--up: #2ee6a8;
+	--up-soft: rgba(46, 230, 168, 0.12);
+	--warn: #ffb648;
+	--danger: #ff5f6d;
+
+	/* Свечения и тени */
+	--glow: 0 0 40px rgba(139, 92, 255, 0.25);
+	--glow-strong: 0 0 60px rgba(139, 92, 255, 0.4);
+	--shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.55);
+
+	--radius-xs: 6px;
+	--radius-sm: 12px;
+	--radius-md: 18px;
+	--radius-lg: 28px;
+	--radius-pill: 999px;
+
+	--container: 1240px;
+	--section: clamp(72px, 9vw, 140px);
+
+	--font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+	--ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--transition: 0.3s var(--ease);
+}
+
+$tablet: 1023px;
+$mobile: 767px;
+$small: 479px;

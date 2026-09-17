@@ -99,3 +99,23 @@ jobs:
             echo "assets/dist отличается от собранного: запустите node build.mjs и закоммитьте."
             exit 1
           }
+
+  sertexity:
+    name: Sertexity
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sertexity
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Сборка
+        run: node build.mjs
+
+      - name: Проверка в браузере на 360, 768 и 1440
+        run: node scripts/check.mjs

@@ -1,0 +1,351 @@
+.container {
+	width: min(100% - 40px, var(--container));
+	margin: 0 auto;
+}
+
+/* Правило из base.css сбрасывается предпросмотром: держим его здесь,
+   иначе padding и рамки считаются сверх ширины. */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+.section {
+	position: relative;
+	padding: var(--section) 0;
+}
+
+.section--tight {
+	padding: clamp(48px, 6vw, 84px) 0;
+}
+
+.section--panel {
+	background: linear-gradient(180deg, rgba(12, 17, 32, 0.85), rgba(5, 7, 13, 0.6));
+	border-top: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+}
+
+.section-head {
+	display: grid;
+	gap: 18px;
+	max-width: 720px;
+	margin-bottom: clamp(32px, 4vw, 64px);
+}
+
+.section-head--center {
+	margin-inline: auto;
+	text-align: center;
+	justify-items: center;
+}
+
+.section-head--row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 24px;
+	max-width: none;
+}
+
+.skip {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+}
+
+.skip:focus {
+	left: 16px;
+	top: 16px;
+	z-index: 200;
+	padding: 12px 18px;
+	border-radius: var(--radius-sm);
+	background: var(--panel);
+	color: var(--fg);
+}
+
+/* --- Шапка --------------------------------------------------------------- */
+
+.header {
+	position: sticky;
+	top: 0;
+	z-index: 60;
+	border-bottom: 1px solid transparent;
+	background: rgba(5, 7, 13, 0.72);
+	backdrop-filter: blur(16px);
+	transition: border-color var(--transition), background-color var(--transition);
+}
+
+.header[data-scrolled="true"] {
+	border-color: var(--line);
+	background: rgba(5, 7, 13, 0.92);
+}
+
+.header__inner {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	min-height: 76px;
+}
+
+.header__progress {
+	height: 2px;
+	width: 100%;
+	transform: scaleX(var(--progress, 0));
+	transform-origin: left;
+	background: linear-gradient(90deg, var(--accent), var(--up));
+	transition: transform 0.15s linear;
+}
+
+.logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	margin-right: auto;
+}
+
+.logo__mark {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--line-2);
+	background: linear-gradient(140deg, rgba(139, 92, 255, 0.2), rgba(46, 230, 168, 0.08));
+	color: #cdbaff;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.logo__text {
+	display: grid;
+	line-height: 1.15;
+}
+
+.logo__name {
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--fg);
+}
+
+.logo__note {
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.nav {
+	display: flex;
+	gap: 24px;
+	font-size: 0.92rem;
+	color: var(--fg-soft);
+}
+
+.nav a {
+	position: relative;
+	padding: 6px 0;
+	transition: color var(--transition);
+}
+
+.nav a::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 1px;
+	background: var(--accent);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform var(--transition);
+}
+
+.nav a:hover,
+.nav a[aria-current="page"] {
+	color: var(--fg);
+}
+
+.nav a:hover::after,
+.nav a[aria-current="page"]::after {
+	transform: scaleX(1);
+}
+
+.burger {
+	display: none;
+	flex-direction: column;
+	gap: 5px;
+	padding: 10px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xs);
+}
+
+.burger span {
+	width: 20px;
+	height: 2px;
+	background: var(--fg);
+	transition: transform var(--transition), opacity var(--transition);
+}
+
+.burger[aria-expanded="true"] span:first-child {
+	transform: translateY(3.5px) rotate(45deg);
+}
+
+.burger[aria-expanded="true"] span:last-child {
+	transform: translateY(-3.5px) rotate(-45deg);
+}
+
+.menu {
+	display: none;
+	border-bottom: 1px solid var(--line);
+	background: rgba(8, 11, 20, 0.98);
+}
+
+.menu[data-open="true"] {
+	display: block;
+	padding: 18px 0 26px;
+}
+
+.menu a {
+	display: block;
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--line-soft);
+	font-size: 1.05rem;
+	color: var(--fg);
+}
+
+.menu__foot {
+	display: grid;
+	gap: 12px;
+	padding: 20px;
+}
+
+/* --- Подвал -------------------------------------------------------------- */
+
+.footer {
+	padding: clamp(48px, 6vw, 80px) 0 24px;
+	border-top: 1px solid var(--line);
+	background: linear-gradient(180deg, rgba(8, 11, 20, 0.9), rgba(5, 7, 13, 0.98));
+}
+
+.footer__grid {
+	display: grid;
+	gap: 32px;
+	grid-template-columns: minmax(260px, 1.5fr) repeat(auto-fit, minmax(150px, 1fr));
+	padding-bottom: 36px;
+}
+
+.footer__col h3 {
+	margin-bottom: 14px;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+
+.footer__col ul {
+	display: grid;
+	gap: 10px;
+}
+
+.footer__col a {
+	font-size: 0.94rem;
+	color: var(--fg-soft);
+	transition: color var(--transition);
+}
+
+.footer__col a:hover {
+	color: var(--fg);
+}
+
+.footer__about {
+	margin-top: 16px;
+	max-width: 42ch;
+	font-size: 0.9rem;
+}
+
+.footer__cik {
+	margin-top: 12px;
+	color: var(--dim);
+}
+
+.footer__bottom {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 24px;
+	justify-content: space-between;
+	padding-top: 20px;
+	border-top: 1px solid var(--line);
+	font-size: 0.82rem;
+	color: var(--muted);
+}
+
+/* --- Заголовок внутренней страницы --------------------------------------- */
+
+.page-head {
+	position: relative;
+	padding: clamp(40px, 5vw, 72px) 0 clamp(24px, 3vw, 40px);
+	border-bottom: 1px solid var(--line);
+}
+
+.page-head h1 {
+	max-width: 24ch;
+	margin: 14px 0 18px;
+}
+
+.page-head .lead {
+	max-width: 68ch;
+}
+
+.breadcrumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 18px;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--muted);
+}
+
+.breadcrumbs a:hover {
+	color: var(--accent);
+}
+
+@media (max-width: 1023px) {
+	.nav,
+	.header__cta {
+		display: none;
+	}
+
+	.burger {
+		display: inline-flex;
+	}
+
+	.footer__grid {
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	}
+}
+
+/* Появление блоков при скролле: класс ставит app.js */
+[data-reveal] {
+	opacity: 0;
+	transform: translateY(22px);
+	transition:
+		opacity 0.7s var(--ease),
+		transform 0.7s var(--ease);
+	transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal].is-in {
+	opacity: 1;
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-reveal] {
+		opacity: 1;
+		transform: none;
+	}
+}

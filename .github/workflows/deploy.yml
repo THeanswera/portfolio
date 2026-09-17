@@ -15,6 +15,7 @@ on:
           - portfolio
           - masterskaya
           - kitstroy
+          - sertexity
 
 jobs:
   deploy:
@@ -42,15 +43,20 @@ jobs:
           fi
 
       - name: Сборка портфолио
-        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy'
+        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
         working-directory: portfolio-site
         run: |
           npm ci
           npm run build
 
       - name: Сборка демо-сайта
-        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy'
+        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
         working-directory: masterskaya-forma
+        run: node build.mjs
+
+      - name: Сборка Sertexity
+        if: inputs.target == 'sertexity'
+        working-directory: sertexity
         run: node build.mjs
 
       - name: Сборка темы «КИТ-Строй.Москва»
@@ -59,17 +65,24 @@ jobs:
         run: node build.mjs
 
       - name: Выгрузка портфолио
-        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy'
+        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
         working-directory: portfolio-site
         env:
           FTP_DIR: /www/rootlost.online
         run: node scripts/deploy.mjs
 
       - name: Выгрузка демо-сайта
-        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy'
+        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
         env:
           FTP_SRC: masterskaya-forma/dist
           FTP_DIR: /www/masterskaya-forma.ru
+        run: node portfolio-site/scripts/deploy.mjs
+
+      - name: Выгрузка Sertexity
+        if: inputs.target == 'sertexity'
+        env:
+          FTP_SRC: sertexity/dist
+          FTP_DIR: /www/masterskaya-forma.online
         run: node portfolio-site/scripts/deploy.mjs
 
       - name: Выгрузка темы «КИТ-Строй.Москва»
@@ -88,6 +101,14 @@ jobs:
             echo "rootlost.ru → $code"
             if [ "$code" != "200" ]; then
               echo "Тема не отвечает: проверьте вывод PHP на хостинге."
+              exit 1
+            fi
+          fi
+          if [ "${{ inputs.target }}" = "sertexity" ]; then
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://masterskaya-forma.online/)
+            echo "masterskaya-forma.online → $code"
+            if [ "$code" != "200" ]; then
+              echo "Sertexity не отвечает: проверьте выгрузку."
               exit 1
             fi
           fi
