@@ -34,7 +34,13 @@ if ( empty( $title ) ) {
 	return;
 }
 
-$specs = kitstroy_get_project_specs( $data );
+$specs = kitstroy_get_project_specs(
+	array(
+		'title'   => $title,
+		'systems' => $data['systems'] ?? array(),
+		'scope'   => $data['scope'] ?? '',
+	)
+);
 ?>
 <article class="project-card" data-reveal>
 	<a class="project-card__media" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
