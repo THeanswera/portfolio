@@ -46,7 +46,7 @@ const TARGETS = [
   // Первый экран Sincere закреплён на всю высоту окна и не сообщает реальную высоту
   // документа: снимаем в окно повыше, иначе в кадре оказывается только шапка.
   { id: 'sincere', url: 'https://sincere-family.ru/', wait: 3200, heightScale: 1.6 },
-  { id: 'sertexity', url: pathToFileURL(path.join(localRoot, '0_verstka_po_maketu/index.html')).href, wait: 2600 },
+  { id: 'sertexity', url: process.env.SERTEXITY_URL ?? 'https://masterskaya-forma.online/', wait: 3200 },
 ];
 
 /** Дополнительные экраны для разбора кейсов. */
@@ -59,6 +59,8 @@ const EXTRA = [
   { id: 'kitstroy', out: 'kitstroy.webp', width: 1440, height: 900, url: 'https://rootlost.ru/' },
   { id: 'kitstroy', out: 'kitstroy-calculator.webp', width: 1440, height: 1000, url: 'https://rootlost.ru/calculator/' },
   { id: 'kitstroy', out: 'kitstroy-portfolio.webp', width: 1440, height: 1000, url: 'https://rootlost.ru/portfolio/' },
+  { id: 'sertexity', out: 'sertexity-calculator.webp', width: 1440, height: 1000, url: 'https://masterskaya-forma.online/calculator/' },
+  { id: 'sertexity', out: 'sertexity-markets.webp', width: 1440, height: 1000, url: 'https://masterskaya-forma.online/markets/' },
 ];
 
 /** Полоса длиннее этого значения в готовом кадре — повод переснять страницу. */
