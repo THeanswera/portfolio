@@ -1,104 +1,112 @@
-﻿// Скачивание папки с хостинга по FTP (резервная копия перед изменениями).
-// Запуск:
-//   $env:FTP_USER='...'; $env:FTP_PASS='...'
-//   node scripts/ftp-pull.mjs <удалённая-папка> <локальная-папка> [макс. файлов]
+// Скачивание папки с хостинга по FTP (резервная копия перед изменениями).
+// Доступы берутся из переменных окружения FTP_USER и FTP_PASS или из .env.ftp
+// в корне репозитория (файл в git не попадает).
+//
+// Запуск: node scripts/ftp-pull.mjs <удалённая-папка> <локальная-папка> [расширения]
+// Пример: node scripts/ftp-pull.mjs /www/site/remont .tmp-remont html,css,js
 import { spawnSync } from 'node:child_process';
-import { mkdir, writeFile, stat } from 'node:fs/promises';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const host = process.env.FTP_HOST ?? '31.31.196.221';
 const port = process.env.FTP_PORT ?? '21';
-const user = process.env.FTP_USER;
-const pass = process.env.FTP_PASS;
-/** curl на Windows вызывается как curl.exe, на остальных системах — как curl. */
-const CURL = process.platform === 'win32' ? 'curl.exe' : 'curl';
-const [remoteDir, localDirArg, limitArg] = process.argv.slice(2);
-const limit = limitArg ? Number(limitArg) : Infinity;
+const curl = process.platform === 'win32' ? 'curl.exe' : 'curl';
 
-if (!user || !pass || !remoteDir || !localDirArg) {
-  console.error('Нужны FTP_USER, FTP_PASS и аргументы: <удалённая-папка> <локальная-папка>');
-  process.exit(1);
+async function credentials() {
+	let user = process.env.FTP_USER;
+	let pass = process.env.FTP_PASS;
+
+	if (user && pass) return { user, pass };
+
+	const text = await readFile(path.resolve('../.env.ftp'), 'utf8').catch(() => '');
+
+	for (const line of text.split(/\r?\n/)) {
+		const match = line.match(/^\s*(FTP_USER|FTP_PASS)\s*=\s*(.+?)\s*$/);
+		if (!match) continue;
+		if (match[1] === 'FTP_USER') user = match[2];
+		if (match[1] === 'FTP_PASS') pass = match[2];
+	}
+
+	return { user, pass };
 }
 
-const localDir = path.resolve(localDirArg);
+const { user, pass } = await credentials();
 
-function ftp(args, { capture = false } = {}) {
-  const config = [
-    `user = "${user}:${pass}"`,
-    'ftp-pasv',
-    'connect-timeout = 30',
-    'silent',
-    'show-error',
-    ...args,
-  ].join('\n');
-
-  const result = spawnSync(CURL, ['--config', '-'], {
-    input: config,
-    encoding: 'utf8',
-    stdio: capture ? ['pipe', 'pipe', 'pipe'] : ['pipe', 'inherit', 'inherit'],
-  });
-  if (result.status !== 0) throw new Error(`curl завершился с кодом ${result.status}`);
-  return result.stdout ?? '';
+if (!user || !pass) {
+	console.error('Нужны FTP_USER и FTP_PASS: переменные окружения или .env.ftp в корне репозитория.');
+	process.exit(1);
 }
 
-function parseListing(listing) {
-  const entries = [];
-  for (const line of listing.split(/\r?\n/)) {
-    const match = line.match(
-      /^([dl-])([rwxst-]{9})\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\d+\s+[\d:]+\s+(.+)$/,
-    );
-    if (!match) continue;
-    const [, type, , size, name] = match;
-    if (name === '.' || name === '..') continue;
-    entries.push({ type, size: Number(size), name });
-  }
-  return entries;
+function config(args) {
+	return [
+		`user = "${user}:${pass}"`,
+		'ftp-pasv',
+		'connect-timeout = 30',
+		'silent',
+		'show-error',
+		...args,
+	].join('\n');
 }
 
-let downloaded = 0;
-let bytes = 0;
+/** Листинг папки: пустой массив, если папки нет или она недоступна. */
+function listing(remote) {
+	const result = spawnSync(curl, ['--config', '-'], {
+		input: config([`url = "ftp://${host}:${port}${remote}/"`]),
+		encoding: 'utf8',
+		maxBuffer: 32 * 1024 * 1024,
+	});
 
-async function walk(remote, local, prefix = '') {
-  await mkdir(local, { recursive: true });
-  const listing = ftp([`url = "ftp://${host}:${port}${remote}/"`], { capture: true });
-  const entries = parseListing(listing);
+	if (result.status !== 0) return [];
 
-  for (const entry of entries) {
-    if (downloaded >= limit) return;
-    const remotePath = `${remote}/${entry.name}`;
-    const localPath = path.join(local, entry.name);
-
-    if (entry.type === 'd') {
-      await walk(remotePath, localPath, `${prefix}${entry.name}/`);
-      continue;
-    }
-
-    const body = spawnSync(CURL, ['--config', '-'], {
-      input: Buffer.from(
-        [
-          `user = "${user}:${pass}"`,
-          'ftp-pasv',
-          'connect-timeout = 30',
-          'silent',
-          'show-error',
-          `url = "ftp://${host}:${port}${encodeURI(remotePath)}"`,
-        ].join('\n'),
-        'utf8',
-      ),
-      encoding: 'buffer',
-      maxBuffer: 64 * 1024 * 1024,
-    });
-    if (body.status !== 0) {
-      console.error(`  ошибка загрузки: ${remotePath}`);
-      continue;
-    }
-    await writeFile(localPath, body.stdout);
-    const size = (await stat(localPath)).size;
-    downloaded += 1;
-    bytes += size;
-    console.log(`↓ ${prefix}${entry.name} (${(size / 1024).toFixed(1)} КБ)`);
-  }
+	return (result.stdout ?? '')
+		.split(/\r?\n/)
+		.map((line) => line.match(/^([dl-])[rwxst-]{9}\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\d+\s+[\d:]+\s+(.+)$/))
+		.filter(Boolean)
+		.map((match) => ({ type: match[1], size: Number(match[2]), name: match[3] }))
+		.filter((entry) => entry.name !== '.' && entry.name !== '..');
 }
 
-await walk(remoteDir.replace(/\/$/, ''), localDir);
-console.log(`\nСкачано файлов: ${downloaded}, объём: ${(bytes / 1024 / 1024).toFixed(2)} МБ → ${localDir}`);
+async function pull(remote, local, extensions, prefix = '') {
+	await mkdir(local, { recursive: true });
+	let downloaded = 0;
+
+	for (const entry of listing(remote)) {
+		const remotePath = `${remote}/${entry.name}`;
+		const localPath = path.join(local, entry.name);
+
+		if (entry.type === 'd') {
+			downloaded += await pull(remotePath, localPath, extensions, `${prefix}${entry.name}/`);
+			continue;
+		}
+
+		if (extensions.length && !extensions.some((ext) => entry.name.endsWith(ext))) continue;
+
+		const body = spawnSync(curl, ['--config', '-'], {
+			input: Buffer.from(config([`url = "ftp://${host}:${port}${encodeURI(remotePath)}"`]), 'utf8'),
+			encoding: 'buffer',
+			maxBuffer: 64 * 1024 * 1024,
+		});
+
+		if (body.status !== 0) {
+			console.error(`  ошибка загрузки: ${remotePath}`);
+			continue;
+		}
+
+		await writeFile(localPath, body.stdout);
+		downloaded += 1;
+		console.log(`↓ ${prefix}${entry.name} (${((await stat(localPath)).size / 1024).toFixed(1)} КБ)`);
+	}
+
+	return downloaded;
+}
+
+const [remoteArg, localArg, extArg] = process.argv.slice(2);
+const extensions = extArg ? extArg.split(',').map((value) => `.${value.replace(/^\./, '')}`) : [];
+
+if (!remoteArg || !localArg) {
+	console.error('Использование: node scripts/ftp-pull.mjs <удалённая-папка> <локальная-папка> [html,css,js]');
+	process.exit(1);
+}
+
+const total = await pull(remoteArg.replace(/\/$/, ''), path.resolve(localArg), extensions);
+console.log(`\nСкачано файлов: ${total}`);
