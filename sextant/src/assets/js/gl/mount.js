@@ -1,5 +1,5 @@
 /**
- * Точка входа 3D: собирает сцену и механизм. Один и тот же модуль
+ * Точка входа 3D: собирает сцену и модель. Один и тот же модуль
  * используется и на страницах сайта, и в скрипте офлайн-рендера, поэтому
  * кадры в галерее выглядят так же, как живая модель в браузере.
  */
@@ -7,6 +7,19 @@ import * as THREE from 'three';
 import { createStage } from './stage.js';
 import { createCalibre } from './calibre.js';
 import { createWatch } from './watch.js';
+
+/**
+ * Включает тени на всех непрозрачных деталях узла. Стекло и сапфир тень
+ * не отбрасывают: чёрное пятно под прозрачной деталью выглядит ошибкой.
+ */
+function enableShadows(root) {
+  root.traverse((child) => {
+    if (!child.isMesh) return;
+    const transparent = child.material?.transparent === true;
+    child.castShadow = !transparent;
+    child.receiveShadow = true;
+  });
+}
 
 /**
  * @param {HTMLCanvasElement} canvas
@@ -23,6 +36,8 @@ export function mountCalibre(canvas, options = {}) {
     minDistance: 2.4,
     maxDistance: 9,
     tilt: 1.06,
+    /* Механизм лежит плашмя: плоскость ловит тень прямо под платиной. */
+    floor: -0.24,
     ...stageOptions,
   });
 
@@ -35,6 +50,7 @@ export function mountCalibre(canvas, options = {}) {
      как на разложенные на столе детали. */
   calibre.group.rotation.x = -Math.PI / 2;
   stage.root.add(calibre.group);
+  enableShadows(calibre.group);
 
   if (frozenTime === null) {
     stage.onFrame((time, delta) => calibre.animate(time, delta));
@@ -55,7 +71,11 @@ export function mountWatch(canvas, options = {}) {
     minDistance: 4.4,
     maxDistance: 16,
     tilt: 1.12,
-    target: new THREE.Vector3(0, 0, 0),
+    /* Центр композиции ниже нуля: ремешок уходит вниз, и без этого
+       кадр перекашивается вверх. */
+    target: new THREE.Vector3(0, -0.5, 0),
+    /* Плоскость прямо под корпусом: она даёт мягкую тень под часами. */
+    floor: -0.72,
     ...stageOptions,
   });
 
@@ -64,6 +84,7 @@ export function mountWatch(canvas, options = {}) {
   const watch = createWatch(watchOptions);
   watch.group.rotation.x = -Math.PI / 2;
   stage.root.add(watch.group);
+  enableShadows(watch.group);
 
   if (frozenTime === null) {
     stage.onFrame((time, delta) => watch.animate(time, delta));

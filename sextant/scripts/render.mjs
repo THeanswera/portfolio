@@ -79,10 +79,25 @@ const harness = `<!doctype html>
 <html lang="ru"><head><meta charset="utf-8">
 <title>render</title>
 <script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
+<link rel="preconnect" href="/">
+<link rel="stylesheet" href="./assets/fonts/fonts.css">
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg, #08090c); }
   #stage { position: fixed; inset: 0; }
   canvas { display: block; width: 100%; height: 100%; }
+  /* Оптика кадра: мягкая зона резкости, виньетка и зерно — без них
+     трёхмерная сцена читается как рисунок, а не как снимок. */
+  .optics { position: fixed; inset: 0; pointer-events: none; }
+  .optics--dof {
+    backdrop-filter: blur(7px);
+    -webkit-mask-image: radial-gradient(circle at 50% 47%, transparent 54%, black 100%);
+    mask-image: radial-gradient(circle at 50% 47%, transparent 54%, black 100%);
+  }
+  .optics--vignette { background: radial-gradient(115% 92% at 50% 44%, transparent 38%, rgba(0,0,0,0.62) 100%); }
+  .optics--grain {
+    opacity: 0.34; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  }
   .og { position: fixed; inset: 0; display: none; align-content: center; gap: 14px; padding: 0 0 0 72px; }
   body[data-og="true"] .og { display: grid; }
   body[data-og="true"] #stage { left: 42%; }
@@ -92,6 +107,9 @@ const harness = `<!doctype html>
 </style></head>
 <body>
 <div id="stage"><canvas id="c" width="1200" height="1200"></canvas></div>
+<div class="optics optics--dof"></div>
+<div class="optics optics--grain"></div>
+<div class="optics optics--vignette"></div>
 <div class="og">
   <span class="og__tag">Часовая мануфактура · Санкт-Петербург</span>
   <span class="og__brand">СЕКСТАНТ</span>

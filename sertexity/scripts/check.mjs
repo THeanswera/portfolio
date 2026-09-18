@@ -180,6 +180,27 @@ try {
     if (!hovered) fail('Глобус: подсказка о площадке не появляется при наведении');
     else pass('Глобус: наведение на площадку показывает комиссию и задержку');
 
+    /* Наклон за курсором: глобус должен заметно отзываться на движение мыши. */
+    await page.client.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', x: Math.round(box.x + box.width * 0.12), y: cy, buttons: 0,
+    });
+    await sleep(120);
+    await page.client.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', x: Math.round(box.x + box.width * 0.88), y: cy, buttons: 0,
+    });
+    await sleep(400);
+
+    const follow = await page.evaluate(`(() => {
+      const state = document.querySelector('[data-globe]').globeState;
+      return { target: state.targetParallaxYaw, actual: state.parallaxYaw, inside: state.pointerInside };
+    })()`);
+
+    if (Math.abs(follow.target) < 0.3 || Math.abs(follow.actual) < 0.1) {
+      fail(`Глобус: наклон за курсором почти не заметен (цель ${follow.target.toFixed(3)}, факт ${follow.actual.toFixed(3)})`);
+    } else {
+      pass(`Глобус: наклоняется за курсором (${follow.actual.toFixed(2)} рад) и держит наклон, пока курсор внутри`);
+    }
+
     await page.close();
   }
 

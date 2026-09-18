@@ -1,9 +1,43 @@
 /**
  * Общая оболочка страниц: документ, шапка, подвал, мета-теги и микроразметка.
  */
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { site, nav } from '../data/site.mjs';
 
 export const u = (href) => `${site.base}${href}`;
+
+/**
+ * Версия ассетов. Браузер держит старые скрипты в кэше, и после публикации
+ * посетитель может ещё долго видеть прошлую версию — так уже было с глобусом.
+ * Версия считается по содержимому файлов, поэтому меняется только при правках.
+ */
+const VERSION = (() => {
+  const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const files = [
+    'assets/css/base.css',
+    'assets/css/typography.css',
+    'assets/css/layout.css',
+    'assets/css/components.css',
+    'assets/css/sections.css',
+    'assets/js/app.js',
+    'assets/js/globe.js',
+    'assets/js/calculator-page.js',
+  ];
+
+  const hash = createHash('sha1');
+  files.forEach((file) => {
+    const full = path.join(root, file);
+    hash.update(existsSync(full) ? readFileSync(full) : file);
+  });
+
+  return hash.digest('hex').slice(0, 8);
+})();
+
+/** Ссылка на ассет с версией: сбрасывает кэш браузера после публикации. */
+export const asset = (href) => `${u(href)}?v=${VERSION}`;
 
 export const escapeHtml = (value) =>
   String(value)
@@ -148,7 +182,7 @@ export function layout({ title, description, path, content, bodyClass = '', json
 <link rel="icon" href="${u('/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${u('/assets/fonts/inter-latin.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${u('/assets/fonts/jetbrains-mono-latin.woff2')}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="${u('/assets/css/app.css')}">
+<link rel="stylesheet" href="${asset('/assets/css/app.css')}">
 ${jsonLd ? `<script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n</script>` : ''}
 </head>
 <body class="${bodyClass}">
@@ -157,7 +191,7 @@ ${header(path)}
 ${content}
 </main>
 ${footer()}
-<script type="module" src="${u('/assets/js/app.js')}"></script>
+<script type="module" src="${asset('/assets/js/app.js')}"></script>
 </body>
 </html>`;
 }

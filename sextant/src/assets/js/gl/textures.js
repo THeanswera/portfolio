@@ -296,3 +296,112 @@ export const disposeTextureCache = () => {
   });
   cache.clear();
 };
+
+/* --- Циферблат ----------------------------------------------------------- */
+
+const DIAL_LOOK = {
+  midnight: { base: '#101a33', edge: '#070c1c', print: 'rgba(226,233,246,0.92)', ring: 'rgba(226,233,246,0.5)' },
+  opal: { base: '#e9e6dd', edge: '#c9c4b7', print: 'rgba(38,36,32,0.9)', ring: 'rgba(38,36,32,0.5)' },
+  graphite: { base: '#24262b', edge: '#101216', print: 'rgba(226,231,240,0.9)', ring: 'rgba(226,231,240,0.45)' },
+  salmon: { base: '#c98a6a', edge: '#9c6248', print: 'rgba(38,26,20,0.88)', ring: 'rgba(38,26,20,0.5)' },
+  meteorite: { base: '#6d727a', edge: '#3f434a', print: 'rgba(240,244,250,0.9)', ring: 'rgba(240,244,250,0.45)' },
+};
+
+/**
+ * Печать на циферблате: минутная шкала, надписи и тонкое кольцо.
+ * Раньше шкала была из шестидесяти металлических брусков — именно она
+ * и делала циферблат похожим на рисунок. Настоящая шкала печатается.
+ */
+export function dialTexture(kind = 'midnight', size = 2048) {
+  return cached(`dial-${kind}-${size}`, () => {
+    const look = DIAL_LOOK[kind] ?? DIAL_LOOK.midnight;
+    const canvas = canvasOf(size);
+    const ctx = canvas.getContext('2d');
+    const center = size / 2;
+    const radius = center;
+
+    /* Основа: солнце с светлым центром и тёмным краем. */
+    const gradient = ctx.createRadialGradient(center, center * 0.86, radius * 0.05, center, center, radius);
+    gradient.addColorStop(0, look.base);
+    gradient.addColorStop(0.55, look.base);
+    gradient.addColorStop(1, look.edge);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+
+    /* Метеорит: полосы Видманштеттена — рисунок травленого железа. */
+    if (kind === 'meteorite') {
+      const random = makeRandom(97);
+      ctx.lineWidth = size / 340;
+      for (let index = 0; index < 90; index += 1) {
+        const angle = random() * Math.PI * 2;
+        const offset = (random() - 0.5) * radius * 1.5;
+        const x = center + Math.cos(angle + Math.PI / 2) * offset;
+        const y = center + Math.sin(angle + Math.PI / 2) * offset;
+        ctx.beginPath();
+        ctx.moveTo(x - Math.cos(angle) * radius, y - Math.sin(angle) * radius);
+        ctx.lineTo(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+        ctx.strokeStyle = `rgba(220,228,240,${(0.05 + random() * 0.14).toFixed(3)})`;
+        ctx.stroke();
+      }
+    }
+
+    ctx.save();
+    ctx.translate(center, center);
+
+    /* Минутная шкала: 60 делений, каждое пятое — длиннее и толще. */
+    for (let index = 0; index < 60; index += 1) {
+      const angle = (index / 60) * Math.PI * 2;
+      const long = index % 5 === 0;
+      const outer = radius * 0.9;
+      const inner = outer - radius * (long ? 0.055 : 0.03);
+
+      ctx.beginPath();
+      ctx.moveTo(Math.sin(angle) * inner, -Math.cos(angle) * inner);
+      ctx.lineTo(Math.sin(angle) * outer, -Math.cos(angle) * outer);
+      ctx.strokeStyle = look.print;
+      ctx.lineWidth = size / (long ? 300 : 520);
+      ctx.stroke();
+    }
+
+    /* Тонкое кольцо шкалы. */
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.9, 0, Math.PI * 2);
+    ctx.strokeStyle = look.ring;
+    ctx.lineWidth = size / 900;
+    ctx.stroke();
+
+    /* Надписи: имя, город, калибр. */
+    const print = (text, y, font, letterSpacing, alpha = 1) => {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = font;
+      ctx.fillStyle = look.print;
+      ctx.textBaseline = 'middle';
+
+      const chars = [...text];
+      const gap = letterSpacing * radius;
+      const width = chars.reduce((sum, char) => sum + ctx.measureText(char).width + gap, 0) - gap;
+      let x = -width / 2;
+
+      chars.forEach((char) => {
+        ctx.fillText(char, x, y);
+        x += ctx.measureText(char).width + gap;
+      });
+      ctx.restore();
+    };
+
+    const serif = `500 ${Math.round(size / 24)}px "Cormorant Garamond", "Times New Roman", serif`;
+    const sans = `400 ${Math.round(size / 62)}px "Golos Text", system-ui, sans-serif`;
+
+    print('СЕКСТАНТ', -radius * 0.52, serif, 0.018);
+    print('САНКТ-ПЕТЕРБУРГ', radius * 0.5, sans, 0.02, 0.85);
+    print('SXT-01 · 62 КАМНЯ', radius * 0.58, sans, 0.02, 0.75);
+
+    ctx.restore();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 8;
+    return texture;
+  });
+}

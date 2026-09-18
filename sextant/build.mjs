@@ -101,11 +101,19 @@ await writeFile(
 );
 console.log('✓ robots.txt');
 
-/* Чистые адреса и кэширование статики. Пути к 404 — с учётом подпапки. */
+/* Чистые адреса и кэширование статики. Пути к 404 — с учётом подпапки.
+   Скрипты и стили браузер перепроверяет при каждой загрузке: иначе после
+   публикации посетитель видит прошлую версию страницы. */
 await writeFile(
   path.join(DIST, '.htaccess'),
   `DirectoryIndex index.html
 ErrorDocument 404 ${BASE}/404.html
+
+<IfModule mod_headers.c>
+  <FilesMatch "\\.(html|js|mjs|css)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
 
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml

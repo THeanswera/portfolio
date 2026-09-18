@@ -1,5 +1,6 @@
 /**
- * Часы целиком: корпус, безель, циферблат с накладными метками, стрелки,
+ * Часы целиком: корпус из трёх тел вращения с разной отделкой, внутренний
+ * борт, печатный циферблат с накладными метками, стрелки со светомассой,
  * сапфировое стекло, задняя крышка с механизмом и ремешок.
  *
  * Плоскость XY — циферблат, +Z — сторона стекла. Конфигуратор меняет
@@ -11,98 +12,140 @@ import {
   caseMaterial,
   casebackGlassMaterial,
   dialMaterial,
-  enamelMaterial,
   leatherMaterial,
   lumeMaterial,
   polishMaterial,
   sapphireMaterial,
 } from './materials.js';
 import { createCalibre, engraving, extrudeShape, mergeGeometries, roundedShape } from './calibre.js';
+import { dialTexture } from './textures.js';
 
 const TAU = Math.PI * 2;
 
-/** Корпус: тело вращения по профилю — от задней крышки до безеля. */
-function caseGeometry(size) {
-  const k = size / 38;
-  const profile = [
-    [0.0, -0.62],
-    [0.62, -0.62],
-    [0.96, -0.6],
-    [1.1, -0.54],
-    [1.15, -0.34],
-    [1.16, -0.08],
-    [1.15, 0.02],
-    [1.1, 0.06],
-    [1.0, 0.08],
-    [0.95, 0.06],
-    [0.95, 0.0],
-    [0.0, 0.0],
-  ].map(([x, y]) => new THREE.Vector2(x * k, y * k));
-
-  const geometry = new THREE.LatheGeometry(profile, 96);
+/** Тело вращения: профиль задаётся парами «радиус, высота». */
+function lathe(profile, k, segments = 128) {
+  const geometry = new THREE.LatheGeometry(
+    profile.map(([x, y]) => new THREE.Vector2(x * k, y * k)),
+    segments,
+  );
   geometry.rotateX(Math.PI / 2);
   geometry.computeVertexNormals();
   return geometry;
 }
 
-/** Ушки: два выступа под ремешок сверху и снизу. */
+/**
+ * Корпус из трёх частей: задняя крышка, боковина и безель. Разная отделка
+ * на стыке даёт ту самую границу «полировка — сатин», по которой часы
+ * и читаются как металл, а не как литая деталь.
+ */
+function caseParts(size) {
+  const k = size / 38;
+
+  const back = lathe(
+    [
+      [0.0, -0.575],
+      [0.4, -0.585],
+      [0.66, -0.605],
+      [0.82, -0.615],
+      [0.9, -0.6],
+      [0.93, -0.56],
+    ],
+    k,
+  );
+
+  const band = lathe(
+    [
+      [0.93, -0.56],
+      [1.0, -0.5],
+      [1.1, -0.4],
+      [1.16, -0.26],
+      [1.185, -0.06],
+      [1.175, 0.005],
+    ],
+    k,
+  );
+
+  const bezel = lathe(
+    [
+      [1.175, 0.005],
+      [1.155, 0.04],
+      [1.1, 0.062],
+      [1.045, 0.07],
+      [1.012, 0.05],
+      [0.99, 0.018],
+      [0.988, -0.005],
+    ],
+    k,
+  );
+
+  return { back, band, bezel };
+}
+
+/** Ушки: сужаются к концу, сверху полированная фаска. */
 function lugGeometry(size) {
   const k = size / 38;
   const shape = roundedShape(
     [
-      new THREE.Vector2(-0.16, -0.1),
-      new THREE.Vector2(0.16, -0.1),
-      new THREE.Vector2(0.19, 0.34),
-      new THREE.Vector2(0.0, 0.42),
-      new THREE.Vector2(-0.19, 0.34),
+      new THREE.Vector2(-0.17, -0.12),
+      new THREE.Vector2(0.17, -0.12),
+      new THREE.Vector2(0.2, 0.22),
+      new THREE.Vector2(0.12, 0.42),
+      new THREE.Vector2(0.0, 0.46),
+      new THREE.Vector2(-0.12, 0.42),
+      new THREE.Vector2(-0.2, 0.22),
     ],
-    0.08,
+    0.07,
   );
-  const geometry = extrudeShape(shape, 0.16);
+  const geometry = extrudeShape(shape, 0.15);
   geometry.scale(k, k, k);
   return geometry;
 }
 
-/** Метки и минутная шкала: одна геометрия на весь циферблат. */
-function markerGeometry(size, count, { inner, outer, width, thickness = 0.022 }) {
+/** Накладные метки: металлическая оправа и светомасса внутри неё. */
+function markerGeometry(size, count, { inner, outer, width, thickness = 0.026 }) {
   const k = size / 38;
-  const parts = [];
 
-  for (let index = 0; index < count; index += 1) {
-    const angle = (index / count) * TAU;
-    const isHour = count === 12 || index % 5 === 0;
-    const length = (outer - inner) * (isHour ? 1 : 0.55);
-    const start = inner + (outer - inner - length);
+  const build = (shrink) => {
+    const parts = [];
 
-    const bar = new THREE.BoxGeometry(width * (isHour ? 1 : 0.55), length, thickness);
-    bar.translate(0, start + length / 2, 0);
-    bar.rotateZ(angle);
-    bar.scale(k, k, k);
-    parts.push(bar);
-  }
+    for (let index = 0; index < count; index += 1) {
+      const angle = (index / count) * TAU;
+      const length = (outer - inner) * shrink;
+      const start = inner + (outer - inner - length) / 2;
 
-  return mergeGeometries(parts);
+      const bar = new THREE.BoxGeometry(width * shrink, length, thickness);
+      bar.translate(0, start + length / 2, 0);
+      bar.rotateZ(angle);
+      parts.push(bar);
+    }
+
+    const merged = mergeGeometries(parts);
+    merged.scale(k, k, k);
+    return merged;
+  };
+
+  return { frame: build(1), inlay: build(0.5) };
 }
 
-/** Стрелка: вытянутый многоугольник с противовесом. */
+/** Стрелка: гранёная, с продольной канавкой под светомассу. */
 function handGeometry({ length, width, tail, thickness = 0.02, size }) {
   const k = size / 38;
   const shape = roundedShape(
     [
       new THREE.Vector2(-width / 2, -tail),
       new THREE.Vector2(width / 2, -tail),
-      new THREE.Vector2(width / 2 * 0.8, length * 0.62),
+      new THREE.Vector2((width / 2) * 0.72, length * 0.66),
       new THREE.Vector2(0, length),
-      new THREE.Vector2(-width / 2 * 0.8, length * 0.62),
+      new THREE.Vector2((-width / 2) * 0.72, length * 0.66),
     ],
-    width * 0.22,
+    width * 0.24,
   );
   const geometry = extrudeShape(shape, thickness);
   geometry.scale(k, k, k);
   return geometry;
 }
 
-/** Ремешок: лента, построенная по кривой от ушка вниз и под корпус. */
+/** Ремешок: лента, построенная по кривой от ушка вниз и под запястье. */
 function strapGeometry({ size, side, length = 0.86, width = 1.04, thickness = 0.07 }) {
   const k = size / 38;
   const direction = side === 'top' ? 1 : -1;
@@ -114,8 +157,6 @@ function strapGeometry({ size, side, length = 0.86, width = 1.04, thickness = 0.
 
   for (let index = 0; index <= segments; index += 1) {
     const t = index / segments;
-    /* Локальные оси: y — к ушкам, z — толщина. После разворота сцены
-       лента уходит от ушек вниз и под корпус, как ремешок на руке. */
     const y = direction * (0.92 + t * length);
     const z = -0.14 - Math.sin(t * 1.5) * 1.62;
     /* Лента сужается к пряжке — так ремешок не выглядит доской. */
@@ -138,7 +179,6 @@ function strapGeometry({ size, side, length = 0.86, width = 1.04, thickness = 0.
 
   /* Вторая сторона ленты: без неё ремешок виден только снаружи. */
   const back = geometry.clone();
-  back.scale(1, 1, 1);
   const offset = back.getAttribute('position');
   for (let index = 0; index < offset.count; index += 1) {
     offset.setZ(index, offset.getZ(index) - thickness * k);
@@ -161,24 +201,25 @@ export function createWatch(options = {}) {
 
   const group = new THREE.Group();
   const nodes = {};
+  const k = size / 38;
 
   const metalCase = caseMaterial(caseKind);
   const metalPolish = polishMaterial(caseKind === 'gold' ? 0xe8c477 : 0xeef2f8);
+  const metalDark = new THREE.MeshStandardMaterial({ color: 0x3a3f47, roughness: 0.5, metalness: 1 });
   const lume = lumeMaterial();
 
   /* --- Корпус ------------------------------------------------------------ */
   const caseGroup = new THREE.Group();
   caseGroup.name = 'case';
 
-  caseGroup.add(new THREE.Mesh(caseGeometry(size), metalCase));
-
-  const bezel = new THREE.Mesh(new THREE.TorusGeometry((1.05 * size) / 38, (0.03 * size) / 38, 16, 96), metalPolish);
-  bezel.position.z = (0.075 * size) / 38;
-  caseGroup.add(bezel);
+  const parts = caseParts(size);
+  caseGroup.add(new THREE.Mesh(parts.back, metalCase));
+  caseGroup.add(new THREE.Mesh(parts.band, metalCase));
+  caseGroup.add(new THREE.Mesh(parts.bezel, metalPolish));
 
   const lugTop = new THREE.Mesh(lugGeometry(size), metalCase);
-  lugTop.position.set(-(0.62 * size) / 38, (1.0 * size) / 38, (-0.16 * size) / 38);
-  lugTop.rotation.z = -0.16;
+  lugTop.position.set((-0.62 * size) / 38, (1.02 * size) / 38, (-0.1 * size) / 38);
+  lugTop.rotation.z = -0.15;
   caseGroup.add(lugTop);
 
   const lugTopRight = lugTop.clone();
@@ -196,26 +237,34 @@ export function createWatch(options = {}) {
   lugBottomRight.rotation.z *= -1;
   caseGroup.add(lugBottomRight);
 
-  /* Заводная головка: рифлёный цилиндр справа. */
+  /* Заводная головка: рифлёный цилиндр с полированной шляпкой. */
   const crown = new THREE.Mesh(
-    new THREE.CylinderGeometry((0.1 * size) / 38, (0.1 * size) / 38, (0.1 * size) / 38, 24),
+    new THREE.CylinderGeometry((0.1 * size) / 38, (0.1 * size) / 38, (0.11 * size) / 38, 28),
     metalPolish,
   );
   crown.rotation.z = Math.PI / 2;
-  crown.position.set((1.24 * size) / 38, 0, 0.02);
+  crown.position.set((1.24 * size) / 38, 0, 0.01);
   caseGroup.add(crown);
 
-  for (let index = 0; index < 16; index += 1) {
-    const angle = (index / 16) * TAU;
-    const flute = new THREE.Mesh(new THREE.BoxGeometry((0.11 * size) / 38, 0.012, 0.012), metalPolish);
+  for (let index = 0; index < 18; index += 1) {
+    const angle = (index / 18) * TAU;
+    const flute = new THREE.Mesh(new THREE.BoxGeometry((0.12 * size) / 38, 0.009, 0.009), metalDark);
     flute.position.set(
       (1.24 * size) / 38,
-      Math.sin(angle) * (0.1 * size) / 38,
-      Math.cos(angle) * (0.1 * size) / 38 + 0.02,
+      (Math.sin(angle) * 0.1 * size) / 38,
+      (Math.cos(angle) * 0.1 * size) / 38 + 0.01,
     );
     flute.rotation.x = -angle;
     caseGroup.add(flute);
   }
+
+  const crownCap = new THREE.Mesh(
+    new THREE.CylinderGeometry((0.062 * size) / 38, (0.062 * size) / 38, (0.02 * size) / 38, 28),
+    metalPolish,
+  );
+  crownCap.rotation.z = Math.PI / 2;
+  crownCap.position.set((1.3 * size) / 38, 0, 0.01);
+  caseGroup.add(crownCap);
 
   group.add(caseGroup);
   nodes.case = caseGroup;
@@ -232,50 +281,46 @@ export function createWatch(options = {}) {
     group.add(calibre.group);
   }
 
-  /* --- Циферблат --------------------------------------------------------- */
+  /* --- Внутренний борт и циферблат --------------------------------------- */
   const dialGroup = new THREE.Group();
   dialGroup.name = 'dial';
 
-  const dial = new THREE.Mesh(
-    new THREE.CylinderGeometry((0.94 * size) / 38, (0.94 * size) / 38, 0.02, 96),
-    dialMaterial(dialKind),
+  const rehautGeometry = new THREE.CylinderGeometry(
+    (0.988 * size) / 38,
+    (0.92 * size) / 38,
+    (0.032 * size) / 38,
+    128,
+    1,
+    true,
   );
-  dial.rotation.x = Math.PI / 2;
-  dial.position.z = (0.02 * size) / 38;
+  rehautGeometry.rotateX(Math.PI / 2);
+
+  const rehautMaterial = metalPolish.clone();
+  rehautMaterial.side = THREE.DoubleSide;
+  const rehaut = new THREE.Mesh(rehautGeometry, rehautMaterial);
+  rehaut.position.z = (0.014 * size) / 38;
+  dialGroup.add(rehaut);
+
+  const dialMaterialInstance = dialMaterial(dialKind);
+  /* Цвет уже нарисован в карте: если оставить цвет материала, он умножится
+     и циферблат станет серым. */
+  dialMaterialInstance.map = dialTexture(dialKind);
+  dialMaterialInstance.color.set(0xffffff);
+  dialMaterialInstance.roughness = 0.34;
+
+  const dial = new THREE.Mesh(new THREE.CircleGeometry((0.92 * size) / 38, 128), dialMaterialInstance);
+  dial.position.z = (0.004 * size) / 38;
   dialGroup.add(dial);
 
-  const hours = new THREE.Mesh(
-    markerGeometry(size, 12, { inner: 0.6, outer: 0.86, width: 0.09, thickness: 0.03 }),
-    metalPolish,
-  );
-  hours.position.z = (0.04 * size) / 38;
-  dialGroup.add(hours);
+  /* Накладные метки: металлическая оправа и светомасса внутри. */
+  const markers = markerGeometry(size, 12, { inner: 0.58, outer: 0.8, width: 0.075, thickness: 0.03 });
+  const markerFrame = new THREE.Mesh(markers.frame, metalPolish);
+  markerFrame.position.z = (0.022 * size) / 38;
+  dialGroup.add(markerFrame);
 
-  const minutes = new THREE.Mesh(
-    markerGeometry(size, 60, { inner: 0.82, outer: 0.88, width: 0.03, thickness: 0.015 }),
-    enamelMaterial(0xbfc6d2),
-  );
-  minutes.position.z = (0.033 * size) / 38;
-  dialGroup.add(minutes);
-
-  /* Светомасса на часовых метках: светится в темноте. */
-  const lumeMarks = new THREE.Mesh(
-    markerGeometry(size, 12, { inner: 0.63, outer: 0.8, width: 0.05, thickness: 0.028 }),
-    lume,
-  );
-  lumeMarks.position.z = (0.05 * size) / 38;
-  dialGroup.add(lumeMarks);
-
-  /* Логотип и подписи на циферблате. */
-  const dialText = (text, x, y, width, size, color) => {
-    const plane = engraving(text, { width, x, y, z: (0.05 * size) / 38 + 0.001, size: 58, letterSpacing: 12 });
-    plane.material.color.set(color);
-    return plane;
-  };
-
-  dialGroup.add(dialText('СЕКСТАНТ', 0, (0.34 * size) / 38, (0.5 * size) / 38, size, 0xd9dee8));
-  dialGroup.add(dialText('САНКТ-ПЕТЕРБУРГ', 0, (-0.42 * size) / 38, (0.34 * size) / 38, size, 0x9aa4b6));
-  dialGroup.add(dialText('SXT-01', 0, (0.24 * size) / 38, (0.24 * size) / 38, size, 0x9aa4b6));
+  const markerInlay = new THREE.Mesh(markers.inlay, lume);
+  markerInlay.position.z = (0.036 * size) / 38;
+  dialGroup.add(markerInlay);
 
   group.add(dialGroup);
   nodes.dial = dialGroup;
@@ -284,65 +329,111 @@ export function createWatch(options = {}) {
   const handsGroup = new THREE.Group();
   handsGroup.name = 'hands';
 
-  const hourHand = new THREE.Group();
-  hourHand.add(new THREE.Mesh(handGeometry({ length: 0.48, width: 0.08, tail: 0.12, size }), metalPolish));
-  const hourLume = new THREE.Mesh(
-    handGeometry({ length: 0.4, width: 0.04, tail: 0.1, thickness: 0.012, size }),
-    lume,
-  );
-  hourLume.position.z = (0.03 * size) / 38;
-  hourHand.add(hourLume);
-  hourHand.position.z = (0.06 * size) / 38;
+  const makeHand = ({ length, width, tail, thickness, lumeScale, z, material }) => {
+    const holder = new THREE.Group();
+    holder.add(new THREE.Mesh(handGeometry({ length, width, tail, thickness, size }), material));
 
-  const minuteHand = new THREE.Group();
-  minuteHand.add(new THREE.Mesh(handGeometry({ length: 0.74, width: 0.06, tail: 0.16, size }), metalPolish));
-  const minuteLume = new THREE.Mesh(
-    handGeometry({ length: 0.62, width: 0.03, tail: 0.14, thickness: 0.012, size }),
-    lume,
-  );
-  minuteLume.position.z = (0.03 * size) / 38;
-  minuteHand.add(minuteLume);
-  minuteHand.position.z = (0.09 * size) / 38;
+    const inlay = new THREE.Mesh(
+      handGeometry({
+        length: length * lumeScale,
+        width: width * 0.42,
+        tail: tail * 0.5,
+        thickness: thickness * 0.6,
+        size,
+      }),
+      lume,
+    );
+    inlay.position.z = (thickness * 0.9 * size) / 38;
+    holder.add(inlay);
+
+    holder.position.z = z;
+    return holder;
+  };
+
+  const hourHand = makeHand({
+    length: 0.46,
+    width: 0.085,
+    tail: 0.12,
+    thickness: 0.022,
+    lumeScale: 0.78,
+    z: (0.05 * size) / 38,
+    material: metalPolish,
+  });
+
+  const minuteHand = makeHand({
+    length: 0.72,
+    width: 0.062,
+    tail: 0.15,
+    thickness: 0.02,
+    lumeScale: 0.8,
+    z: (0.078 * size) / 38,
+    material: metalPolish,
+  });
 
   const secondHand = new THREE.Group();
+  const secondMetal = new THREE.MeshStandardMaterial({ color: 0xd8a94e, roughness: 0.22, metalness: 1 });
   secondHand.add(
-    new THREE.Mesh(
-      handGeometry({ length: 0.82, width: 0.022, tail: 0.24, thickness: 0.012, size }),
-      new THREE.MeshStandardMaterial({ color: 0xd8a94e, roughness: 0.25, metalness: 1 }),
-    ),
+    new THREE.Mesh(handGeometry({ length: 0.8, width: 0.02, tail: 0.2, thickness: 0.009, size }), secondMetal),
   );
-  secondHand.position.z = (0.12 * size) / 38;
+
+  const counterweight = new THREE.Mesh(
+    new THREE.CylinderGeometry((0.05 * size) / 38, (0.05 * size) / 38, (0.012 * size) / 38, 24),
+    secondMetal,
+  );
+  counterweight.rotation.x = Math.PI / 2;
+  counterweight.position.y = (-0.2 * size) / 38;
+  secondHand.add(counterweight);
+  secondHand.position.z = (0.1 * size) / 38;
 
   handsGroup.add(hourHand, minuteHand, secondHand);
   group.add(handsGroup);
   nodes.hands = handsGroup;
 
   /* --- Стекло и задняя крышка -------------------------------------------- */
-  /* Купол: сферический сегмент с радиусом основания 0,94 и подъёмом 0,09. */
+  /* Купол: сферический сегмент с радиусом основания 0,95 и подъёмом 0,07. */
   const crystal = new THREE.Mesh(
-    new THREE.SphereGeometry(4.47, 96, 24, 0, TAU, 0, 0.212),
+    new THREE.SphereGeometry(6.4, 128, 32, 0, TAU, 0, 0.149),
     sapphireMaterial(),
   );
   crystal.rotation.x = Math.PI / 2;
-  crystal.position.z = 0.09 - 4.47;
+  crystal.position.z = 0.065 - 6.4;
   group.add(crystal);
+
+  /* Кромка стекла: без неё купол не читается — стекло выглядит отсутствующим. */
+  const crystalEdge = new THREE.Mesh(
+    new THREE.TorusGeometry((0.945 * size) / 38, (0.012 * size) / 38, 12, 128),
+    new THREE.MeshStandardMaterial({ color: 0xdfe9ff, roughness: 0.05, metalness: 1, envMapIntensity: 2.6 }),
+  );
+  crystalEdge.position.z = (0.012 * size) / 38;
+  group.add(crystalEdge);
   nodes.crystal = crystal;
 
   if (showMovement) {
     const backRing = new THREE.Mesh(
-      new THREE.TorusGeometry((0.92 * size) / 38, (0.055 * size) / 38, 14, 80),
+      new THREE.TorusGeometry((0.88 * size) / 38, (0.05 * size) / 38, 16, 96),
       metalCase,
     );
-    backRing.position.z = (-0.6 * size) / 38;
+    backRing.position.z = (-0.57 * size) / 38;
     group.add(backRing);
 
     const backGlass = new THREE.Mesh(
-      new THREE.CylinderGeometry((0.9 * size) / 38, (0.9 * size) / 38, 0.012, 80),
+      new THREE.CylinderGeometry((0.86 * size) / 38, (0.86 * size) / 38, 0.012, 96),
       casebackGlassMaterial(),
     );
     backGlass.rotation.x = Math.PI / 2;
-    backGlass.position.z = (-0.585 * size) / 38;
+    backGlass.position.z = (-0.56 * size) / 38;
     group.add(backGlass);
+
+    /* Гравировка на задней крышке: имя, калибр, водозащита. */
+    const backText = engraving('СЕКСТАНТ · SXT-01 · 100 м', {
+      width: (0.8 * size) / 38,
+      z: (-0.618 * size) / 38,
+      size: 46,
+      letterSpacing: 8,
+    });
+    backText.rotation.y = Math.PI;
+    backText.material.color.set(0x2a2f38);
+    group.add(backText);
   }
 
   /* --- Ремешок ----------------------------------------------------------- */
@@ -357,7 +448,10 @@ export function createWatch(options = {}) {
     strap.add(top, bottom);
 
     /* Пряжка на нижнем ремешке. */
-    const buckle = new THREE.Mesh(new THREE.TorusGeometry((0.42 * size) / 38, (0.045 * size) / 38, 12, 40), metalPolish);
+    const buckle = new THREE.Mesh(
+      new THREE.TorusGeometry((0.42 * size) / 38, (0.045 * size) / 38, 14, 48),
+      metalPolish,
+    );
     buckle.position.set(0, (-1.72 * size) / 38, (-1.62 * size) / 38);
     buckle.rotation.x = Math.PI / 2.1;
     strap.add(buckle);
@@ -367,7 +461,7 @@ export function createWatch(options = {}) {
   }
 
   /* --- Время на стрелках -------------------------------------------------- */
-  const state = { second: 0, sweep: 0 };
+  const state = { sweep: 0 };
 
   const animate = (time, delta) => {
     const now = new Date(time);
@@ -409,15 +503,17 @@ export function createWatch(options = {}) {
       preset.dispose();
 
       const polished =
-        next.caseKind === 'gold' ? 0xe8c477 : next.caseKind === 'titanium-dlc' ? 0x5a6068 : 0xeef2f8;
+        next.caseKind === 'gold' ? 0xe8c477 : next.caseKind === 'titanium-dlc' ? 0x6a707a : 0xeef2f8;
       metalPolish.color.set(polished);
+      rehautMaterial.color.set(polished);
     }
 
     if (next.dialKind) {
       const preset = dialMaterial(DIAL_KINDS[next.dialKind] ?? next.dialKind);
-      dial.material.color.copy(preset.color);
+      dial.material.color.set(0xffffff);
       dial.material.roughness = preset.roughness;
       dial.material.metalness = preset.metalness;
+      dial.material.map = dialTexture(next.dialKind);
       dial.material.needsUpdate = true;
       preset.dispose();
     }
@@ -432,7 +528,14 @@ export function createWatch(options = {}) {
     }
   };
 
-  return { group, nodes, animate, apply, calibre, materials: { case: metalCase, polish: metalPolish, strap: strapMaterial, dial: dial.material } };
+  return {
+    group,
+    nodes,
+    animate,
+    apply,
+    calibre,
+    materials: { case: metalCase, polish: metalPolish, strap: strapMaterial, dial: dial.material },
+  };
 }
 
 export const WATCH_METALS = METALS;

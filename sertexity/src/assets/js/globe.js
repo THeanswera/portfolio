@@ -97,6 +97,8 @@ export function initGlobe(canvas) {
     parallaxPitch: 0,
     targetParallaxYaw: 0,
     targetParallaxPitch: 0,
+    /** Курсор над глобусом: пока он там, наклон не возвращается назад. */
+    pointerInside: false,
     hovered: -1,
     hoverAmount: 0,
     hintShown: true,
@@ -376,6 +378,7 @@ export function initGlobe(canvas) {
 
     dragStart = { x: event.clientX, y: event.clientY, yaw: state.yaw, pitch: state.pitch, moved: 0 };
     state.dragging = true;
+    state.pointerInside = true;
     state.velocity = 0;
     state.spin = 0;
     idleSince = performance.now();
@@ -383,8 +386,13 @@ export function initGlobe(canvas) {
     canvas.dataset.dragging = 'true';
   });
 
+  canvas.addEventListener('pointerenter', () => {
+    state.pointerInside = true;
+  });
+
   canvas.addEventListener('pointermove', (event) => {
     const point = localPoint(event);
+    state.pointerInside = true;
 
     if (state.dragging && dragStart) {
       const dx = event.clientX - dragStart.x;
@@ -412,12 +420,13 @@ export function initGlobe(canvas) {
       showTip(nodes[hovered], screenPositions[hovered].x, screenPositions[hovered].y);
     }
 
-    /* Наклон вслед за курсором: глобус отзывается на мышь. */
+    /* Наклон вслед за курсором: глобус заметно отзывается на мышь,
+       а не просто дрожит. Пока курсор внутри — наклон держится. */
     if (finePointer && !prefersReduced) {
       const nx = point.x / Math.max(1, width) - 0.5;
       const ny = point.y / Math.max(1, height) - 0.5;
-      state.targetParallaxYaw = nx * 0.34;
-      state.targetParallaxPitch = -ny * 0.22;
+      state.targetParallaxYaw = nx * 1.1;
+      state.targetParallaxPitch = -ny * 0.6;
     }
 
     lastMove = performance.now();
@@ -453,6 +462,7 @@ export function initGlobe(canvas) {
 
   canvas.addEventListener('pointerleave', () => {
     if (state.dragging) return;
+    state.pointerInside = false;
     state.hovered = -1;
     hideTip();
     state.targetParallaxYaw = 0;
@@ -518,15 +528,15 @@ export function initGlobe(canvas) {
 
       if (Math.abs(state.velocity) < 0.00002) state.velocity = 0;
 
-      /* Плавное возвращение наклона к исходному, если курсор ушёл. */
-      if (!prefersReduced && now - lastMove > 400) {
+      /* Наклон возвращается к исходному, только когда курсор ушёл с глобуса. */
+      if (!prefersReduced && !state.pointerInside) {
         state.targetParallaxYaw *= 0.96;
         state.targetParallaxPitch *= 0.96;
       }
     }
 
-    state.parallaxYaw += (state.targetParallaxYaw - state.parallaxYaw) * 0.06;
-    state.parallaxPitch += (state.targetParallaxPitch - state.parallaxPitch) * 0.06;
+    state.parallaxYaw += (state.targetParallaxYaw - state.parallaxYaw) * 0.1;
+    state.parallaxPitch += (state.targetParallaxPitch - state.parallaxPitch) * 0.1;
 
     const yaw = state.yaw + state.parallaxYaw;
     const pitch = clamp(state.pitch + state.parallaxPitch, -PITCH_LIMIT - 0.2, PITCH_LIMIT + 0.2);

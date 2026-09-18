@@ -1,3 +1,26 @@
 # Заявки, сохранённые обработчиком демо-сайта, на хостинг не выгружаем
 data/
 *.jsonl
+
+# Скрипты и стили браузер должен перепроверять при каждой загрузке страницы:
+# иначе после публикации посетитель видит прошлую версию — так уже было
+# с глобусом, который «не тянулся мышью», хотя на сервере лежал новый файл.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|mjs|css)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Шрифты и картинки не меняются — их можно держать в кэше долго.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType font/woff2 "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+</IfModule>
+
+# Сжатие: три минифицированные сборки three.js весят меньше в gzip.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml
+</IfModule>

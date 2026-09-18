@@ -31,6 +31,7 @@ export function createStage(canvas, options = {}) {
     target = new THREE.Vector3(0, 0, 0),
     exposure = 0.98,
     background = null,
+    floor = null,
   } = options;
 
   const renderer = new THREE.WebGLRenderer({
@@ -43,12 +44,42 @@ export function createStage(canvas, options = {}) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = exposure;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = false;
+
+  /* Мягкие тени: без них предмет висит в пустоте и выглядит нарисованным. */
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
   if (background) scene.background = background;
   scene.environment = createEnvironment(renderer);
   const lights = createLights(scene);
+
+  lights.key.castShadow = true;
+  lights.key.shadow.mapSize.set(2048, 2048);
+  lights.key.shadow.radius = 5;
+  lights.key.shadow.bias = -0.0008;
+  lights.key.shadow.normalBias = 0.025;
+
+  const shadowCamera = lights.key.shadow.camera;
+  shadowCamera.left = -3.4;
+  shadowCamera.right = 3.4;
+  shadowCamera.top = 3.4;
+  shadowCamera.bottom = -3.4;
+  shadowCamera.near = 0.5;
+  shadowCamera.far = 20;
+  shadowCamera.updateProjectionMatrix();
+
+  /* Невидимая плоскость под предметом: она ничего не рисует, только ловит тень. */
+  if (floor !== null) {
+    const catcher = new THREE.Mesh(
+      new THREE.PlaneGeometry(40, 40),
+      new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.42 }),
+    );
+    catcher.rotation.x = -Math.PI / 2;
+    catcher.position.y = floor;
+    catcher.receiveShadow = true;
+    scene.add(catcher);
+  }
 
   const camera = new THREE.PerspectiveCamera(fov, 1, 0.05, 200);
   const root = new THREE.Group();

@@ -70,32 +70,40 @@ export function wheelMaterial(tone = 0xd9b25f) {
 export const rubyMaterial = () =>
   standard({ color: 0x8d1020, roughness: 0.14, metalness: 0.15, emissive: 0x33050c, emissiveIntensity: 0.4 });
 
-/** Сапфировое стекло: прозрачное, с сильным отражением по краю. */
+/**
+ * Сапфировое стекло. Преломление через transmission на программном рендере
+ * не работает, поэтому стекло собрано из двух честных признаков: почти
+ * невидимый купол с сильным отражением окружения и просветляющий оттенок
+ * по кромке. Без них циферблат выглядит незастеклённым.
+ */
 export const sapphireMaterial = () =>
   new THREE.MeshPhysicalMaterial({
-    color: 0xdfe8ff,
-    metalness: 0,
-    roughness: 0.03,
+    color: 0xcfdfff,
+    metalness: 0.2,
+    roughness: 0.02,
     transparent: true,
-    opacity: 0.16,
+    opacity: 0.13,
+    ior: 1.77,
+    reflectivity: 1,
     clearcoat: 1,
-    clearcoatRoughness: 0.02,
-    envMapIntensity: 2.4,
-    depthWrite: false,
+    clearcoatRoughness: 0,
+    specularIntensity: 1,
+    envMapIntensity: 3.4,
     side: THREE.FrontSide,
   });
 
 /** Тёмный сапфир задней крышки: видно механизм, но стекло читается. */
 export const casebackGlassMaterial = () =>
   new THREE.MeshPhysicalMaterial({
-    color: 0x9fb4d8,
-    metalness: 0,
-    roughness: 0.05,
+    color: 0xcfdfff,
+    metalness: 0.2,
+    roughness: 0.03,
     transparent: true,
-    opacity: 0.1,
+    opacity: 0.14,
+    ior: 1.77,
     clearcoat: 1,
-    envMapIntensity: 2,
-    depthWrite: false,
+    clearcoatRoughness: 0,
+    envMapIntensity: 2.8,
   });
 
 /** Циферблат: солнечные лучи. */
