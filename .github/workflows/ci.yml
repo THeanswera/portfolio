@@ -119,3 +119,26 @@ jobs:
 
       - name: Проверка в браузере на 360, 768 и 1440
         run: node scripts/check.mjs
+
+  sextant:
+    name: СЕКСТАНТ
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sextant
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Сборка
+        run: node build.mjs
+
+      - name: Проверка кодировки исходников
+        run: node ../portfolio-site/scripts/check-mojibake.mjs . mjs,js,css,php,json
+
+      - name: Проверка в браузере: страницы, 3D-сцены, конфигуратор
+        run: node scripts/check.mjs

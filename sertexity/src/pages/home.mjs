@@ -45,7 +45,14 @@ const hero = `<section class="hero">
     </div>
 
     <div class="globe">
-      <canvas class="globe__canvas" data-globe role="img" aria-label="Map of twelve exchanges and the arbitrage routes between them"></canvas>
+      <canvas
+        class="globe__canvas"
+        data-globe
+        tabindex="0"
+        role="application"
+        aria-label="Interactive map of twelve exchanges and the arbitrage routes between them. Drag to rotate, or use the arrow keys."
+      ></canvas>
+      <span class="globe__hint">Drag to rotate · hover a venue</span>
       <div class="globe__badge globe__badge--a">
         <span>route</span>
         <strong>Binance → Coinbase</strong>

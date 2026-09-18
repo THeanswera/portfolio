@@ -16,6 +16,7 @@ on:
           - masterskaya
           - kitstroy
           - sertexity
+          - sextant
 
 jobs:
   deploy:
@@ -59,6 +60,13 @@ jobs:
         working-directory: sertexity
         run: node build.mjs
 
+      - name: Сборка «СЕКСТАНТ» в подпапку сайта
+        if: inputs.target == 'sextant'
+        working-directory: sextant
+        env:
+          SEXTANT_BASE: /sextant
+        run: node build.mjs
+
       - name: Сборка темы «КИТ-Строй.Москва»
         if: inputs.target == 'kitstroy'
         working-directory: kitstroy-moscow
@@ -85,6 +93,13 @@ jobs:
           FTP_DIR: /www/masterskaya-forma.online
         run: node portfolio-site/scripts/deploy.mjs
 
+      - name: Выгрузка «СЕКСТАНТ»
+        if: inputs.target == 'sextant'
+        env:
+          FTP_SRC: sextant/dist
+          FTP_DIR: /www/rootlost.online/sextant
+        run: node portfolio-site/scripts/deploy.mjs
+
       - name: Выгрузка темы «КИТ-Строй.Москва»
         if: inputs.target == 'kitstroy'
         env:
@@ -109,6 +124,14 @@ jobs:
             echo "masterskaya-forma.online → $code"
             if [ "$code" != "200" ]; then
               echo "Sertexity не отвечает: проверьте выгрузку."
+              exit 1
+            fi
+          fi
+          if [ "${{ inputs.target }}" = "sextant" ]; then
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://rootlost.online/sextant/)
+            echo "rootlost.online/sextant → $code"
+            if [ "$code" != "200" ]; then
+              echo "«СЕКСТАНТ» не отвечает: проверьте выгрузку в подпапку."
               exit 1
             fi
           fi

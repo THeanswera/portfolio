@@ -47,6 +47,8 @@ const TARGETS = [
   // документа: снимаем в окно повыше, иначе в кадре оказывается только шапка.
   { id: 'sincere', url: 'https://sincere-family.ru/', wait: 3200, heightScale: 1.6 },
   { id: 'sertexity', url: process.env.SERTEXITY_URL ?? 'https://masterskaya-forma.online/', wait: 3200 },
+  /* «СЕКСТАНТ»: две 3D-сцены на страницах, поэтому ждём дольше. */
+  { id: 'sextant', url: process.env.SEXTANT_URL ?? 'https://rootlost.online/sextant/', wait: 5200 },
 ];
 
 /** Дополнительные экраны для разбора кейсов. */
@@ -56,11 +58,21 @@ const EXTRA = [
   { id: 'forma', out: 'forma-project.webp', width: 1440, height: 1000, url: `${FORMA}projects/kuhnya-s-ostrovom-v-barvihe/` },
   { id: 'forma', out: 'forma-mobile.webp', width: 390, height: 1180, url: FORMA },
   { id: 'sincere', out: 'sincere-album.webp', width: 1440, height: 1000, url: 'https://sincere-family.ru/pidzhak_album/' },
+  { id: 'sincere', out: 'sincere.webp', width: 1440, height: 900, url: 'https://sincere-family.ru/' },
+  { id: 'technoremont', out: 'technoremont.webp', width: 1440, height: 900, url: 'https://rootlost.online/remont/' },
   { id: 'kitstroy', out: 'kitstroy.webp', width: 1440, height: 900, url: 'https://rootlost.ru/' },
   { id: 'kitstroy', out: 'kitstroy-calculator.webp', width: 1440, height: 1000, url: 'https://rootlost.ru/calculator/' },
   { id: 'kitstroy', out: 'kitstroy-portfolio.webp', width: 1440, height: 1000, url: 'https://rootlost.ru/portfolio/' },
+  /* Первый экран Sertexity переснимается с живого сайта: в кейсе долго висел
+     кадр старого макета, который уже не совпадал с тем, что открывается. */
+  { id: 'sertexity', out: 'sertexity.webp', width: 1440, height: 900, url: 'https://masterskaya-forma.online/' },
   { id: 'sertexity', out: 'sertexity-calculator.webp', width: 1440, height: 1000, url: 'https://masterskaya-forma.online/calculator/' },
   { id: 'sertexity', out: 'sertexity-markets.webp', width: 1440, height: 1000, url: 'https://masterskaya-forma.online/markets/' },
+  { id: 'sextant', out: 'sextant.webp', width: 1440, height: 900, url: 'https://rootlost.online/sextant/' },
+  { id: 'sextant', out: 'sextant-calibre.webp', width: 1440, height: 1100, url: 'https://rootlost.online/sextant/calibre/' },
+  { id: 'sextant', out: 'sextant-configurator.webp', width: 1440, height: 1100, url: 'https://rootlost.online/sextant/configurator/' },
+  { id: 'sextant', out: 'sextant-collection.webp', width: 1440, height: 1100, url: 'https://rootlost.online/sextant/collection/' },
+  { id: 'sextant', out: 'sextant-mobile.webp', width: 390, height: 1180, url: 'https://rootlost.online/sextant/' },
 ];
 
 /** Полоса длиннее этого значения в готовом кадре — повод переснять страницу. */

@@ -32,6 +32,7 @@ const PAGES = [
   { id: 'case-technoremont', url: '/case.html?work=technoremont', widths: [1440] },
   { id: 'case-sincere', url: '/case.html?work=sincere', widths: [1440] },
   { id: 'case-sertexity', url: '/case.html?work=sertexity', widths: [1440] },
+  { id: 'case-sextant', url: '/case.html?work=sextant', widths: [1440, 768] },
   { id: 'privacy', url: '/privacy.html', widths: [1440] },
   { id: 'case-missing', url: '/case.html?work=unknown', widths: [1440] },
 ];

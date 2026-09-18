@@ -123,6 +123,63 @@ try {
       pass(`Глобус: canvas ${globe.width}×${globe.height}, закрашенных точек ${globe.painted}`);
     }
 
+    /* Вращение мышью: тянем canvas вбок и смотрим на угол поворота. */
+    const box = await page.evaluate(`(() => {
+      const rect = document.querySelector('[data-globe]').getBoundingClientRect();
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    })()`);
+    const cx = Math.round(box.x + box.width / 2);
+    const cy = Math.round(box.y + box.height / 2);
+    const yawBefore = await page.evaluate('document.querySelector("[data-globe]").globeState.yaw');
+
+    await page.client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: cx, y: cy, buttons: 0 });
+    await page.client.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed', x: cx, y: cy, button: 'left', buttons: 1, clickCount: 1,
+    });
+    for (let step = 1; step <= 12; step += 1) {
+      await page.client.send('Input.dispatchMouseEvent', {
+        type: 'mouseMoved', x: cx + step * 14, y: cy - step * 3, button: 'left', buttons: 1,
+      });
+    }
+    await page.client.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased', x: cx + 168, y: cy - 36, button: 'left', buttons: 0,
+    });
+    await sleep(200);
+
+    const dragState = await page.evaluate(`(() => {
+      const state = document.querySelector('[data-globe]').globeState;
+      return { yaw: state.yaw, pitch: state.pitch, dragging: state.dragging };
+    })()`);
+
+    if (Math.abs(dragState.yaw - yawBefore) < 0.2) {
+      fail(`Глобус: перетаскивание не повернуло сферу (${yawBefore.toFixed(3)} → ${dragState.yaw.toFixed(3)})`);
+    } else if (dragState.dragging) {
+      fail('Глобус: перетаскивание не завершилось после отпускания кнопки');
+    } else {
+      pass(`Глобус: тянется мышью, поворот ${yawBefore.toFixed(2)} → ${dragState.yaw.toFixed(2)} рад`);
+    }
+
+    /* Наведение на площадку: ищем точку, где появляется подсказка. */
+    let hovered = null;
+    for (let ring = 1; ring <= 4 && !hovered; ring += 1) {
+      for (let angle = 0; angle < 12 && !hovered; angle += 1) {
+        const radius = ring * (box.width / 9);
+        const x = Math.round(cx + Math.cos((angle / 12) * Math.PI * 2) * radius);
+        const y = Math.round(cy + Math.sin((angle / 12) * Math.PI * 2) * radius);
+        await page.client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y, buttons: 0 });
+        await sleep(60);
+        const state = await page.evaluate(`(() => {
+          const canvas = document.querySelector('[data-globe]');
+          const tip = document.querySelector('.globe__tip');
+          return { hovered: canvas.globeState.hovered, tip: tip ? !tip.hidden : false };
+        })()`);
+        if (state.hovered !== -1 && state.tip) hovered = state;
+      }
+    }
+
+    if (!hovered) fail('Глобус: подсказка о площадке не появляется при наведении');
+    else pass('Глобус: наведение на площадку показывает комиссию и задержку');
+
     await page.close();
   }
 

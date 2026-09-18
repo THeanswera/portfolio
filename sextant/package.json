@@ -1,0 +1,13 @@
+{
+  "name": "sextant",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "СЕКСТАНТ — сайт часовой мануфактуры: генератор страниц, 3D-калибр на Three.js, конфигуратор",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node scripts/serve.mjs",
+    "check": "node scripts/check.mjs",
+    "render": "node scripts/render.mjs"
+  }
+}

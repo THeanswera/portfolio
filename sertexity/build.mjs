@@ -52,7 +52,7 @@ const clientData = {
     minDeposit: site.minDeposit,
     minWithdraw: site.minWithdraw,
   },
-  exchanges: exchanges.map(({ name, city, code, lat, lon, latency }) => ({ name, city, code, lat, lon, latency })),
+  exchanges: exchanges.map(({ name, city, code, lat, lon, fee, latency }) => ({ name, city, code, lat, lon, fee, latency })),
   pairs,
 };
 await writeFile(
