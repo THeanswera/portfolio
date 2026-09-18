@@ -670,7 +670,7 @@ export type SpecRow =
   | { value: null; text: string; label: string; note: string };
 
 export const spec: SpecRow[] = [
-  { value: 4, suffix: '', label: 'проекта в работе', note: 'живые сайты' },
+  { value: 5, suffix: '', label: 'проектов в работе', note: 'живые сайты' },
   { value: 3, suffix: '', label: 'направления', note: 'лендинги · корпоративные · wordpress' },
   { value: null, text: 'под ключ', label: 'формат работы', note: 'по макету, ТЗ или идее' },
 ];

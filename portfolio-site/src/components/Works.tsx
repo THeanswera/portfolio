@@ -11,6 +11,16 @@ const PREVIEW_MIN_Y = 92; // ниже фиксированной шапки
 
 const caseHref = (work: Work) => `./case.html?work=${work.id}`;
 
+/** Русское склонение: 1 работа, 2 работы, 5 работ. */
+function plural(count: number, one: string, few: string, many: string) {
+  const mod100 = count % 100;
+  const mod10 = count % 10;
+  if (mod100 >= 11 && mod100 <= 14) return many;
+  if (mod10 === 1) return one;
+  if (mod10 >= 2 && mod10 <= 4) return few;
+  return many;
+}
+
 /** Устройства с настоящим курсором — только там включаем превью, следующее за мышью. */
 function useHoverCapable() {
   const [capable, setCapable] = useState(false);
@@ -141,7 +151,7 @@ export function Works() {
         <Reveal>
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
             <p className="label-mono">
-              {rest.length} работы · нажмите, чтобы открыть разбор
+              {rest.length} {plural(rest.length, 'работа', 'работы', 'работ')} · нажмите, чтобы открыть разбор
             </p>
             {canHover && (
               <span className="label-mono hidden lg:block">наведите на строку — сайт прокрутится</span>
