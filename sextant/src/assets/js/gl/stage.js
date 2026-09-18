@@ -8,7 +8,18 @@ import { createEnvironment, createLights } from './environment.js';
 
 const prefersReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/**
+ * Сцена собирается только при живом WebGL. Если контекст не выдаётся
+ * (старый браузер, отключено аппаратное ускорение, сборочная машина),
+ * возвращаем null — страница остаётся рабочей, без модели.
+ */
 export function createStage(canvas, options = {}) {
+  const probe = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
+
+  if (!probe) {
+    canvas.dataset.unavailable = 'true';
+    return null;
+  }
   const {
     distance = 6,
     fov = 26,

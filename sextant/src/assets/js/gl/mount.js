@@ -26,6 +26,8 @@ export function mountCalibre(canvas, options = {}) {
     ...stageOptions,
   });
 
+  if (!stage) return null;
+
   const calibre = createCalibre();
 
   /* Механизм собран в плоскости XY (толщина по Z), а камера облетает сцену
@@ -56,6 +58,8 @@ export function mountWatch(canvas, options = {}) {
     target: new THREE.Vector3(0, 0, 0),
     ...stageOptions,
   });
+
+  if (!stage) return null;
 
   const watch = createWatch(watchOptions);
   watch.group.rotation.x = -Math.PI / 2;

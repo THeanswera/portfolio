@@ -79,10 +79,10 @@ export async function withBrowser({ port = 9336, profile = '.tmp-check/profile' 
     chrome,
     [
       '--headless=new',
-      /* Программный WebGL: сцены на three.js должны рисоваться и в проверке. */
+      /* Программный WebGL: сцены на three.js должны рисоваться и в проверке.
+         Флаги --use-gl/--use-angle не задаём: на сборочных машинах Chrome
+         с ними не поднимается, а одного разрешения SwiftShader достаточно. */
       '--enable-unsafe-swiftshader',
-      '--use-gl=angle',
-      '--use-angle=swiftshader',
       '--hide-scrollbars',
       '--no-first-run',
       '--no-default-browser-check',
@@ -95,14 +95,23 @@ export async function withBrowser({ port = 9336, profile = '.tmp-check/profile' 
     { stdio: 'ignore' },
   );
 
+  let started = false;
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
       const res = await fetch(`http://127.0.0.1:${port}/json/version`);
-      if (res.ok) break;
+      if (res.ok) {
+        started = true;
+        break;
+      }
     } catch {
       /* браузер ещё поднимается */
     }
     await sleep(250);
+  }
+
+  if (!started) {
+    browser.kill();
+    throw new Error(`Браузер не поднялся на порту ${port}: проверьте CHROME_PATH и флаги запуска.`);
   }
 
   const open = async (url, { width = 1440, height = 900 } = {}) => {

@@ -1,17 +1,15 @@
 /**
  * Страница калибра: разборка механизма на узлы и подсветка выбранной детали.
+ * Если WebGL недоступен, сцены нет и страница остаётся текстовой.
  */
 import { mountCalibre } from '../gl/mount.js';
 
 const canvas = document.querySelector('[data-explode]');
+const mounted = canvas ? mountCalibre(canvas, { distance: 7.2, tilt: 1.0, autoRotate: 0.00012 }) : null;
 
-if (canvas) {
+if (mounted) {
+  const { stage: scene, calibre } = mounted;
   const stage = canvas.closest('.stage');
-  const { stage: scene, calibre } = mountCalibre(canvas, {
-    distance: 7.2,
-    tilt: 1.0,
-    autoRotate: 0.00012,
-  });
 
   canvas.addEventListener('pointerdown', () => {
     if (stage) stage.dataset.dragged = 'true';
@@ -80,13 +78,23 @@ if (canvas) {
 
       if (!isSame) {
         /* Разворот к выбранному узлу: у каждого своё место на плате. */
-        const angle = { barrel: -0.9, train: 0.4, balance: -1.1, escapement: -0.6, bridges: 0.2, jewels: 0.6, mainplate: 0, rotor: 0 };
+        const angle = {
+          barrel: -0.9,
+          train: 0.4,
+          balance: -1.1,
+          escapement: -0.6,
+          bridges: 0.2,
+          jewels: 0.6,
+          mainplate: 0,
+          rotor: 0,
+        };
         scene.setView(0.62 + (angle[id] ?? 0), id === 'mainplate' ? 1.4 : 0.95, id === 'mainplate' ? 7.8 : 6.4);
       }
     });
   });
 
-  scene.onFrame((time, delta) => {    state.factor += (state.target - state.factor) * 0.06 * (delta / 16);
+  scene.onFrame((time, delta) => {
+    state.factor += (state.target - state.factor) * 0.06 * (delta / 16);
 
     Object.entries(OFFSETS).forEach(([id, offset]) => {
       const node = calibre.nodes[id];

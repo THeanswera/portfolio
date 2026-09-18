@@ -8,20 +8,25 @@ import { data } from '../data.js';
 const configurator = data.configurator;
 const canvas = document.querySelector('[data-watch]');
 
+/* Смета считается всегда, даже если WebGL недоступен и модели нет. */
+const mounted = canvas
+  ? mountWatch(canvas, {
+      distance: 8.6,
+      tilt: 1.02,
+      autoRotate: 0.00014,
+      watch: { size: 38, caseKind: 'steel', dialKind: 'midnight', strapTone: 0x4a3a2c },
+    })
+  : null;
+
 if (canvas) {
   const stage = canvas.closest('.stage');
-  const { stage: scene, watch } = mountWatch(canvas, {
-    distance: 8.6,
-    tilt: 1.02,
-    autoRotate: 0.00014,
-    watch: { size: 38, caseKind: 'steel', dialKind: 'midnight', strapTone: 0x4a3a2c },
-  });
+  const scene = mounted?.stage ?? null;
+  const watch = mounted?.watch ?? null;
+  const rub = (value) => `${value.toLocaleString('ru-RU')} ₽`;
 
   canvas.addEventListener('pointerdown', () => {
     if (stage) stage.dataset.dragged = 'true';
   });
-
-  const rub = (value) => `${value.toLocaleString('ru-RU')} ₽`;
 
   /* Соответствие идентификаторов данных материалам сцены. */
   const CASE_KINDS = { steel: 'steel', rhodium: 'steelBrushed', 'titanium-dlc': 'dlc' };
@@ -65,6 +70,7 @@ if (canvas) {
   };
 
   const applyMaterials = () => {
+    if (!watch) return;
     watch.apply({
       caseKind: CASE_KINDS[state.case],
       dialKind: DIAL_KINDS[state.dial],
@@ -84,7 +90,7 @@ if (canvas) {
 
       if (group === 'size') {
         /* Размер — это пропорция корпуса: масштабируем узел целиком. */
-        watch.group.scale.setScalar(Number(state.size) / 38);
+        watch?.group.scale.setScalar(Number(state.size) / 38);
       } else {
         applyMaterials();
       }
@@ -113,5 +119,5 @@ if (canvas) {
   applyMaterials();
 
   /* Состояние наружу: по нему проверка в браузере читает выбранные варианты. */
-  window.sextantWatch = { stage: scene, watch, state };
+  if (mounted) window.sextantWatch = { stage: scene, watch, state };
 }
