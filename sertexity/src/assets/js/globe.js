@@ -10,7 +10,14 @@
 import { data } from './data.js';
 
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const finePointer = window.matchMedia('(pointer: fine)').matches;
+
+/**
+ * Наклон за курсором включается, если у устройства есть мышь. Полагаться
+ * только на media-запрос `pointer: fine` нельзя: в headless-браузере на Linux
+ * он не срабатывает, хотя мышь есть. Поэтому первое же событие от мыши
+ * включает режим — на тачфоне таких событий не бывает.
+ */
+let parallaxEnabled = window.matchMedia('(pointer: fine)').matches;
 
 const TAU = Math.PI * 2;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -393,6 +400,7 @@ export function initGlobe(canvas) {
   canvas.addEventListener('pointermove', (event) => {
     const point = localPoint(event);
     state.pointerInside = true;
+    if (event.pointerType === 'mouse') parallaxEnabled = true;
 
     if (state.dragging && dragStart) {
       const dx = event.clientX - dragStart.x;
@@ -422,7 +430,7 @@ export function initGlobe(canvas) {
 
     /* Наклон вслед за курсором: глобус заметно отзывается на мышь,
        а не просто дрожит. Пока курсор внутри — наклон держится. */
-    if (finePointer && !prefersReduced) {
+    if (parallaxEnabled && !prefersReduced) {
       const nx = point.x / Math.max(1, width) - 0.5;
       const ny = point.y / Math.max(1, height) - 0.5;
       state.targetParallaxYaw = nx * 1.1;
