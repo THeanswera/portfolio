@@ -29,40 +29,62 @@ export const CONTAINER_FLAGS = process.env.CI ? ['--no-sandbox', '--disable-dev-
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Запущенные браузеры по порту: нужно, чтобы перезапустить процесс при сбое. */
+const running = new Map();
+
 export function launchBrowser({ port = 9333, profileDir }) {
   const chrome = findChrome();
   if (!chrome) throw new Error('Не найден Chrome или Edge для проверки в браузере.');
 
-  const browser = spawn(
-    chrome,
-    [
-      '--headless=new',
-      '--disable-gpu',
-      '--hide-scrollbars',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-extensions',
-      ...CONTAINER_FLAGS,
-      `--remote-debugging-port=${port}`,
-      `--user-data-dir=${profileDir}`,
-      'about:blank',
-    ],
-    { stdio: 'ignore' },
-  );
+  const args = [
+    '--headless=new',
+    '--disable-gpu',
+    '--hide-scrollbars',
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--disable-extensions',
+    ...CONTAINER_FLAGS,
+    `--remote-debugging-port=${port}`,
+    `--user-data-dir=${profileDir}`,
+    'about:blank',
+  ];
 
+  const browser = spawn(chrome, args, { stdio: 'ignore' });
+  running.set(port, { chrome, args });
   return browser;
 }
 
-export async function waitForBrowser(port, attempts = 40) {
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
+/**
+ * Ждём порт отладки. На сборочных машинах Chrome изредка не поднимается
+ * с первого раза: тогда процесс перезапускается, и ожидание продолжается.
+ * Это не дефект сайта, поэтому проверка не должна падать сразу.
+ */
+export async function waitForBrowser(port, attempts = 60) {
+  const alive = async () => {
     try {
       const res = await fetch(`http://127.0.0.1:${port}/json/version`);
-      if (res.ok) return;
+      return res.ok;
     } catch {
-      /* браузер ещё поднимается */
+      return false;
     }
+  };
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (await alive()) return;
     await sleep(250);
   }
+
+  const entry = running.get(port);
+  if (entry) {
+    console.warn('Браузер не поднялся, перезапускаем…');
+    spawn(entry.chrome, entry.args, { stdio: 'ignore', detached: true }).unref();
+
+    for (let attempt = 0; attempt < attempts * 2; attempt += 1) {
+      if (await alive()) return;
+      await sleep(250);
+    }
+  }
+
   throw new Error('Браузер не запустился: порт отладки недоступен');
 }
 
