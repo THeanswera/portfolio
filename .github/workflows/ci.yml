@@ -140,5 +140,5 @@ jobs:
       - name: Проверка кодировки исходников
         run: node ../portfolio-site/scripts/check-mojibake.mjs . mjs,js,css,php,json
 
-      - name: Проверка в браузере: страницы, 3D-сцены, конфигуратор
+      - name: Проверка страниц, 3D-сцен и конфигуратора в браузере
         run: node scripts/check.mjs
