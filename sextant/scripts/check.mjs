@@ -400,15 +400,23 @@ try {
   for (const width of [360, 1440]) {
     const page = await browser.open(`${base}/gallery/`, { width });
     await page.evaluate(`document.querySelectorAll('[data-reveal]').forEach((node) => node.classList.add('is-in'))`);
+    /* Ленивые картинки грузим принудительно: на сборочной машине
+       четырнадцать снимков не успевают догрузиться за время прокрутки. */
+    await page.evaluate(`document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; })`);
     await page.evaluate(`(async () => {
       const step = window.innerHeight * 0.7;
       for (let y = 0; y < document.body.scrollHeight; y += step) {
         window.scrollTo(0, y);
-        await new Promise((resolve) => setTimeout(resolve, 120));
+        await new Promise((resolve) => setTimeout(resolve, 150));
       }
       window.scrollTo(0, 0);
     })()`);
-    await sleep(800);
+
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      const pending = await page.evaluate('[...document.images].filter((img) => !img.complete).length');
+      if (pending === 0) break;
+      await sleep(400);
+    }
 
     const gallery = await page.evaluate(`(() => {
       const grid = document.querySelector('.gallery');
