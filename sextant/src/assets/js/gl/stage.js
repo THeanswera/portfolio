@@ -132,47 +132,57 @@ export function createStage(canvas, options = {}) {
 
   /* --- Управление: перетаскивание, колесо, инерция ---------------------- */
 
-  const localPoint = (event) => {
-    const rect = canvas.getBoundingClientRect();
-    return { x: event.clientX - rect.left, y: event.clientY - rect.top, width: rect.width, height: rect.height };
+  const pointers = new Map();
+  const controller = new AbortController();
+  const listen = (node, type, fn, options = {}) =>
+    node.addEventListener(type, fn, { ...options, signal: controller.signal });
+  const clampDistance = value => Math.min(maxDistance, Math.max(minDistance, value));
+  const clampPhi = value => Math.min(Math.PI - 0.02, Math.max(0.02, value));
+  let gesture = null;
+  const baseline = () => {
+    const points = [...pointers.values()];
+    gesture = points.length > 1
+      ? { gap: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y), distance: state.targetDistance }
+      : points.length ? { ...points[0], theta: state.targetTheta, phi: state.targetPhi } : null;
   };
-
-  let dragStart = null;
-
-  canvas.addEventListener('pointerdown', (event) => {
+  listen(canvas, 'pointerdown', event => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    dragStart = { x: event.clientX, y: event.clientY, theta: state.targetTheta, phi: state.targetPhi };
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     state.dragging = true;
     state.velocity = 0;
     canvas.setPointerCapture?.(event.pointerId);
     canvas.dataset.dragging = 'true';
     state.idleAt = performance.now();
+    baseline();
   });
-
-  canvas.addEventListener('pointermove', (event) => {
-    if (!state.dragging || !dragStart) return;
-    const point = localPoint(event);
-    const scale = 6.2 / Math.max(240, point.width);
-    state.targetTheta = dragStart.theta + (event.clientX - dragStart.x) * scale;
-    state.targetPhi = Math.min(2.65, Math.max(0.3, dragStart.phi - (event.clientY - dragStart.y) * scale));
-    state.velocity = (event.clientX - dragStart.x) * 0.00012;
+  listen(canvas, 'pointermove', event => {
+    if (!pointers.has(event.pointerId) || !gesture) return;
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const points = [...pointers.values()];
+    if (points.length > 1) {
+      const gap = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+      if (zoom && gap > 0 && gesture.gap > 0)
+        state.targetDistance = clampDistance(gesture.distance * gesture.gap / gap);
+    } else {
+      const scale = 6.2 / Math.max(240, canvas.getBoundingClientRect().width);
+      state.targetTheta = gesture.theta + (event.clientX - gesture.x) * scale;
+      state.targetPhi = clampPhi(gesture.phi - (event.clientY - gesture.y) * scale);
+    }
     state.idleAt = performance.now();
   });
-
-  const endDrag = (event) => {
-    if (!state.dragging) return;
-    state.dragging = false;
-    canvas.dataset.dragging = 'false';
-    if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-    dragStart = null;
+  const endDrag = event => {
+    pointers.delete(event.pointerId);
+    state.dragging = pointers.size > 0;
+    canvas.dataset.dragging = String(state.dragging);
+    baseline();
     state.idleAt = performance.now();
   };
-
-  canvas.addEventListener('pointerup', endDrag);
-  canvas.addEventListener('pointercancel', endDrag);
+  listen(canvas, 'pointerup', endDrag);
+  listen(canvas, 'pointercancel', endDrag);
+  listen(canvas, 'lostpointercapture', endDrag);
 
   if (zoom) {
-    canvas.addEventListener(
+    listen(canvas,
       'wheel',
       (event) => {
         /* Колесо над сценой приближает, но страницу не блокирует:
@@ -189,13 +199,16 @@ export function createStage(canvas, options = {}) {
   }
 
   /* Клавиатура: стрелки поворачивают модель. */
-  canvas.addEventListener('keydown', (event) => {
+  listen(canvas, 'keydown', (event) => {
     const step = 0.16;
     const map = {
+      Home: () => { state.targetTheta = 0.62; state.targetPhi = tilt; state.targetDistance = distance; state.velocity = 0; },
+      '+': () => { if (zoom) state.targetDistance = clampDistance(state.targetDistance / 1.15); },
+      '-': () => { if (zoom) state.targetDistance = clampDistance(state.targetDistance * 1.15); },
       ArrowLeft: () => (state.targetTheta -= step),
       ArrowRight: () => (state.targetTheta += step),
-      ArrowUp: () => (state.targetPhi = Math.max(0.3, state.targetPhi - step * 0.6)),
-      ArrowDown: () => (state.targetPhi = Math.min(2.65, state.targetPhi + step * 0.6)),
+      ArrowUp: () => (state.targetPhi = clampPhi(state.targetPhi - step * 0.6)),
+      ArrowDown: () => (state.targetPhi = clampPhi(state.targetPhi + step * 0.6)),
     };
 
     if (map[event.key]) {
@@ -208,6 +221,8 @@ export function createStage(canvas, options = {}) {
   /* --- Цикл ------------------------------------------------------------- */
 
   let last = performance.now();
+  let animationId;
+  let observer;
 
   const frame = (now) => {
     const delta = Math.min(48, now - last);
@@ -232,22 +247,22 @@ export function createStage(canvas, options = {}) {
       renderer.render(scene, camera);
     }
 
-    requestAnimationFrame(frame);
+    animationId = requestAnimationFrame(frame);
   };
 
   updateCamera();
   resize();
-  requestAnimationFrame(frame);
+  animationId = requestAnimationFrame(frame);
 
   if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => entries.forEach((entry) => (state.visible = entry.isIntersecting)),
       { rootMargin: '120px' },
     );
     observer.observe(canvas);
   }
 
-  document.addEventListener('visibilitychange', () => {
+  listen(document, 'visibilitychange', () => {
     state.paused = document.hidden;
   });
 
@@ -264,7 +279,8 @@ export function createStage(canvas, options = {}) {
     onFrame: (hook) => frameHooks.push(hook),
     onResize: (hook) => resizeHooks.push(hook),
     setDistance: (value) => {
-      state.targetDistance = value;
+      state.targetDistance = clampDistance(value);
+      state.idleAt = performance.now();
     },
     /* Ракурс для офлайн-рендера: выставляем без инерции. */
     setView: (theta, phi, dist = state.distance) => {
@@ -274,6 +290,8 @@ export function createStage(canvas, options = {}) {
       state.targetPhi = phi;
       state.distance = dist;
       state.targetDistance = dist;
+      state.velocity = 0;
+      state.idleAt = performance.now();
       updateCamera();
     },
     renderOnce: () => {
@@ -283,6 +301,22 @@ export function createStage(canvas, options = {}) {
       return renderer.domElement.toDataURL('image/png');
     },
     dispose: () => {
+      cancelAnimationFrame(animationId);
+      controller.abort();
+      observer?.disconnect();
+      scene.environment?.dispose();
+      const geometries = new Set(), materials = new Set(), textures = new Set();
+      scene.traverse(node => {
+        if (node.geometry) geometries.add(node.geometry);
+        for (const material of (Array.isArray(node.material) ? node.material : [node.material])) {
+          if (!material) continue;
+          materials.add(material);
+          Object.values(material).forEach(value => { if (value?.isTexture) textures.add(value); });
+        }
+      });
+      textures.forEach(item => item.dispose());
+      materials.forEach(item => item.dispose());
+      geometries.forEach(item => item.dispose());
       window.removeEventListener('resize', resize);
       renderer.dispose();
     },

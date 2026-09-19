@@ -308,8 +308,10 @@
 	background: #0a0b0e;
 }
 
+/* Широкая карточка занимает четыре колонки из шести: вместе с обычной
+   соседкой это ровно строка, поэтому мозаика идёт без дыр. */
 .gallery__item--wide {
-	grid-column: span 3;
+	grid-column: span 4;
 }
 
 .gallery__item--tall {
@@ -323,9 +325,7 @@
 	object-fit: cover;
 	aspect-ratio: 16 / 10;
 	transition: transform 1.3s var(--ease), filter 0.6s var(--ease);
-}
-
-.gallery__item--tall img {
+}.gallery__item--tall img {
 	aspect-ratio: 4 / 5;
 }
 
@@ -778,3 +778,10 @@
 		opacity: 0.5;
 	}
 }
+
+/* Viewer gestures are captured only on the watch; the surrounding page scrolls. */
+[data-watch] { touch-action: none; }
+[data-watch]:focus-visible { outline: 2px solid #c9a35c; outline-offset: -3px; }
+.watch-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
+.watch-tools .chip { min-height: 44px; padding: 10px 14px; }
+.watch-tools .chip:disabled { opacity: .45; cursor: default; }

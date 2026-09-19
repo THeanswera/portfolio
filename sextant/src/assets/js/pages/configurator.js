@@ -11,7 +11,9 @@ const canvas = document.querySelector('[data-watch]');
 /* Смета считается всегда, даже если WebGL недоступен и модели нет. */
 const mounted = canvas
   ? mountWatch(canvas, {
-      distance: 8.6,
+      distance: 11.8,
+      maxDistance: 20,
+      floor: null,
       tilt: 1.02,
       autoRotate: 0.00014,
       watch: { size: 38, caseKind: 'steel', dialKind: 'midnight', strapTone: 0x4a3a2c },
@@ -120,4 +122,31 @@ if (canvas) {
 
   /* Состояние наружу: по нему проверка в браузере читает выбранные варианты. */
   if (mounted) window.sextantWatch = { stage: scene, watch, state };
+}
+
+// Ракурсы соответствуют модели, лежащей циферблатом вверх (+Y).
+const controls = document.querySelectorAll('[data-view], [data-zoom], [data-spin]');
+if (!mounted) {
+  controls.forEach(button => button.disabled = true);
+  const status = document.querySelector('[data-watch-status]');
+  if (status) status.textContent = '3D недоступно в этом браузере. Выбор отделки и расчёт стоимости работают.';
+} else {
+  const scene = mounted.stage;
+  const spin = document.querySelector('[data-spin]');
+  const setSpin = enabled => {
+    scene.state.spin = enabled ? 0.00014 : 0;
+    scene.state.velocity = 0;
+    scene.state.idleAt = performance.now();
+    spin.setAttribute('aria-pressed', String(enabled));
+  };
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setSpin(false);
+  document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
+    const views = { front: [0, 0.02, 11.8], side: [Math.PI / 2, Math.PI / 2, 11.8], back: [0, Math.PI - 0.02, 11.8], reset: [0.62, 1.02, 11.8] };
+    scene.setView(...views[button.dataset.view]);
+    setSpin(false);
+  }));
+  document.querySelectorAll('[data-zoom]').forEach(button => button.addEventListener('click', () => {
+    scene.setDistance(scene.state.targetDistance * (button.dataset.zoom === 'in' ? 1 / 1.2 : 1.2));
+  }));
+  spin.addEventListener('click', () => setSpin(scene.state.spin === 0));
 }

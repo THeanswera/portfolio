@@ -38,9 +38,21 @@ const content = `<section class="page-hero">
   <div class="container config" data-configurator>
     <div class="config__stage">
       <div class="stage" data-watch-stage>
-        <canvas data-watch aria-label="Модель часов в выбранной конфигурации" role="img" tabindex="0"></canvas>
-        <span class="stage__hint">Потяните, чтобы повернуть</span>
+        <canvas data-watch aria-label="Модель часов в выбранной конфигурации" role="img" aria-describedby="watch-help" tabindex="0"></canvas>
+        <span class="stage__hint">Потяните, чтобы повернуть · Колесо — масштаб</span>
       </div>
+      <div class="watch-tools" role="group" aria-label="Управление 3D-моделью">
+        <button class="chip" type="button" data-view="front">Циферблат</button>
+        <button class="chip" type="button" data-view="side">Профиль</button>
+        <button class="chip" type="button" data-view="back">Задняя крышка</button>
+        <button class="chip" type="button" data-view="reset">Сбросить вид</button>
+        <button class="chip" type="button" data-zoom="in" aria-label="Приблизить">＋</button>
+        <button class="chip" type="button" data-zoom="out" aria-label="Отдалить">−</button>
+        <button class="chip" type="button" data-spin aria-pressed="true">Автовращение</button>
+      </div>
+      <p class="form__note" id="watch-help">Вращайте мышью или пальцем. Масштаб — колёсиком или двумя пальцами. С клавиатуры: стрелки, + / −, Home.</p>
+      <p class="form__note">Трёхмерный макет показывает сочетание отделки и пропорции корпуса. Как выглядят те же поверхности вблизи — на фотографиях в <a class="accent" href="${u('/collection/')}">коллекции</a> и <a class="accent" href="${u('/gallery/')}">галерее</a>.</p>
+      <p class="form__note" data-watch-status role="status"></p>
     </div>
 
     <div class="config__panel">

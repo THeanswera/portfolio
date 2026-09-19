@@ -30,24 +30,28 @@ const dryRun = args.includes('--dry-run');
 const restore = args.includes('--restore');
 
 /**
- * Что куда кладём. Ширина и высота — итоговый размер файла: картинка
- * обрезается по центру до этих пропорций и масштабируется.
+ * Что куда кладём. Ширина и высота — предельный размер: картинка обрезается
+ * по центру до этих пропорций, но вверх не растягивается. Если исходник
+ * меньше, размер остаётся исходным — иначе снимок становится мыльным.
  */
 const TARGETS = [
-  { name: 'watch-greenwich', width: 1600, height: 1600, note: 'ГРИНВИЧ 38, три четверти' },
-  { name: 'watch-pulkovo', width: 1600, height: 1600, note: 'ПУЛКОВО 40, открытый баланс' },
-  { name: 'watch-azimuth', width: 1600, height: 1600, note: 'АЗИМУТ 42, титан с DLC' },
-  { name: 'watch-caseback', width: 1600, height: 1100, note: 'задняя крышка с механизмом' },
-  { name: 'watch-profile', width: 1600, height: 1100, note: 'профиль корпуса' },
-  { name: 'watch-gold', width: 1600, height: 1100, note: 'золотая версия' },
-  { name: 'calibre-plan', width: 1400, height: 1400, note: 'механизм, вид сверху' },
-  { name: 'calibre-top', width: 1400, height: 1400, note: 'механизм, три четверти' },
-  { name: 'calibre-macro', width: 1600, height: 1000, note: 'мосты и отделка' },
-  { name: 'calibre-balance', width: 1600, height: 1000, note: 'баланс и спираль' },
+  { name: 'watch-greenwich', width: 1600, height: 1600, note: 'ГРИНВИЧ 38, сталь, «полярная ночь»' },
+  { name: 'watch-pulkovo', width: 1600, height: 1600, note: 'ПУЛКОВО 40, открытый баланс на 6 часах' },
+  { name: 'watch-azimuth', width: 1600, height: 1600, note: 'АЗИМУТ 42, титан с покрытием DLC' },
+  { name: 'watch-caseback', width: 1600, height: 1000, note: 'задняя крышка из сапфира, виден механизм' },
+  { name: 'watch-profile', width: 1600, height: 1000, note: 'профиль корпуса' },
+  { name: 'watch-gold', width: 1600, height: 1000, note: 'золотая версия, циферблат «лосось»' },
+  { name: 'calibre-plan', width: 1600, height: 1000, note: 'механизм, вид сверху' },
+  { name: 'calibre-top', width: 1600, height: 1000, note: 'механизм под прозрачным циферблатом' },
+  { name: 'calibre-macro', width: 1600, height: 1000, note: 'мосты: женевские полосы и англаж' },
+  { name: 'calibre-balance', width: 1600, height: 1000, note: 'баланс и спираль Бреге' },
   { name: 'calibre-train', width: 1600, height: 1000, note: 'колёсная передача' },
-  { name: 'calibre-barrel', width: 1600, height: 1000, note: 'барабан и пружина' },
-  { name: 'calibre-escapement', width: 1600, height: 1000, note: 'анкерный ход' },
-  { name: 'calibre-profile', width: 1600, height: 1000, note: 'механизм сбоку' },
+  { name: 'calibre-barrel', width: 1600, height: 1000, note: 'барабан и заводная пружина' },
+  { name: 'calibre-escapement', width: 1600, height: 1000, note: 'анкерная вилка и палеты' },
+  { name: 'calibre-profile', width: 1600, height: 1000, note: 'механизм сбоку, четыре уровня деталей' },
+  { name: 'calibre-open', width: 1600, height: 1000, note: 'анкерный ход в собранных часах' },
+  { name: 'calibre-bench', width: 1600, height: 1000, note: 'часы и барабан рядом' },
+  { name: 'watch-open-dial', width: 1600, height: 1000, note: 'открытый циферблат: виден ход колёс' },
 ];
 
 const EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.avif'];
@@ -235,15 +239,18 @@ try {
       }
 
       const canvas = document.createElement('canvas');
-      canvas.width = ${item.width};
-      canvas.height = ${item.height};
+      /* Вверх не растягиваем: если исходник меньше цели, оставляем его размер. */
+      const scale = Math.min(1, ${item.width} / sw);
+      canvas.width = Math.round(sw * scale);
+      canvas.height = Math.round(sh * scale);
       const ctx = canvas.getContext('2d');
       ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(image, sx, sy, sw, sh, 0, 0, ${item.width}, ${item.height});
+      ctx.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
 
       return {
         source: [image.naturalWidth, image.naturalHeight],
-        data: canvas.toDataURL(${isPng ? "'image/png'" : "'image/webp', 0.92"}),
+        result: [canvas.width, canvas.height],
+        data: canvas.toDataURL(${isPng ? "'image/png'" : "'image/webp', 0.9"}),
       };
     })()`;
 
@@ -258,7 +265,7 @@ try {
       continue;
     }
 
-    const { source, data } = result.result.value;
+    const { source, result: output, data } = result.result.value;
     const buffer = Buffer.from(data.split(',')[1], 'base64');
 
     /* Прежний рендер сохраняем: к нему можно вернуться командой --restore. */
@@ -270,7 +277,7 @@ try {
     await writeFile(path.join(TARGET_DIR, outName), buffer);
     installed += 1;
     console.log(
-      `✓ ${item.name.padEnd(22)} ${source[0]}×${source[1]} → ${item.width}×${item.height}, ` +
+      `✓ ${item.name.padEnd(22)} ${source[0]}×${source[1]} → ${output[0]}×${output[1]}, ` +
         `${(buffer.length / 1024).toFixed(0)} КБ`,
     );
   }

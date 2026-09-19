@@ -283,6 +283,37 @@ try {
     if (engraving.hidden) fail('Конфигуратор: гравировка не добавилась в расчёт');
     else pass(`Конфигуратор: гравировка добавляет строку, итог ${engraving.total}`);
 
+    /* Кнопки ракурсов: они должны переставлять камеру, а не только нажиматься. */
+    const views = await page.evaluate(`(async () => {
+      const before = window.sextantWatch.stage.state.phi;
+      document.querySelector('[data-view="back"]').click();
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      const after = window.sextantWatch.stage.state.phi;
+
+      const zoomBefore = window.sextantWatch.stage.state.distance;
+      document.querySelector('[data-zoom="in"]').click();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      return {
+        before,
+        after,
+        zoomBefore,
+        zoomAfter: window.sextantWatch.stage.state.targetDistance,
+        buttons: document.querySelectorAll('[data-view], [data-zoom], [data-spin]').length,
+      };
+    })()`);
+
+    if (Math.abs(views.after - views.before) < 0.3) {
+      fail(`Конфигуратор: кнопка «Задняя крышка» не переставила камеру (${views.before.toFixed(2)} → ${views.after.toFixed(2)})`);
+    } else if (views.zoomAfter >= views.zoomBefore) {
+      fail(`Конфигуратор: кнопка «+» не приблизила модель (${views.zoomBefore.toFixed(2)} → ${views.zoomAfter.toFixed(2)})`);
+    } else {
+      pass(
+        `Конфигуратор: ${views.buttons} кнопок управления, ракурс и масштаб меняются ` +
+          `(${views.before.toFixed(2)} → ${views.after.toFixed(2)} рад, дистанция ${views.zoomBefore.toFixed(1)} → ${views.zoomAfter.toFixed(1)})`,
+      );
+    }
+
     await page.close();
   }
 

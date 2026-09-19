@@ -457,36 +457,60 @@ export const gallery = {
   lead: 'Макросъёмка механизма и корпусов: видно, как свет ложится на полированные фаски, женевские полосы и зернение.',
   items: [
     {
-      src: '/assets/img/calibre-balance.webp',
-      caption: 'Баланс и спираль Бреге: амплитуда 290°, частота 4\u00A0Гц',
-    },
-    {
-      src: '/assets/img/calibre-profile.webp',
-      caption: 'Вид сбоку: баланс, мост и ротор подзавода в одном кадре',
-    },
-    {
       src: '/assets/img/calibre-macro.webp',
       caption: 'Мосты: женевские полосы и полированные фаски англаж',
     },
     {
-      src: '/assets/img/calibre-top.webp',
-      caption: 'Камни в опорах: 62 рубиновых камня, втулки осей и палеты',
+      src: '/assets/img/calibre-balance.webp',
+      caption: 'Баланс и спираль Бреге: амплитуда 290°, частота 4\u00A0Гц',
+    },
+    {
+      src: '/assets/img/calibre-escapement.webp',
+      caption: 'Анкерная вилка и палеты: швейцарский анкерный ход под увеличением',
     },
     {
       src: '/assets/img/calibre-train.webp',
-      caption: 'Ротор подзавода с женевскими полосами и гравировкой калибра',
+      caption: 'Колёсная передача: золочёные колёса и стальные трибы',
     },
     {
       src: '/assets/img/calibre-barrel.webp',
-      caption: 'Заводной барабан и заводная пружина: запас хода 72 часа',
+      caption: 'Заводной барабан и заводная пружина: запас хода 72\u00A0часа',
     },
     {
       src: '/assets/img/calibre-plan.webp',
-      caption: 'Вид сверху: 218 деталей, мосты, винты и камни в опорах',
+      caption: 'Вид сверху: платина с зернением, ротор подзавода и камни в опорах',
     },
     {
-      src: '/assets/img/calibre-macro.webp',
-      caption: 'Платина и мосты: зернение плоскостей рядом с полированными фасками',
+      src: '/assets/img/calibre-profile.webp',
+      caption: 'Вид сбоку: механизм в сборе, четыре уровня деталей',
+    },
+    {
+      src: '/assets/img/calibre-top.webp',
+      caption: 'Механизм под прозрачным циферблатом: видно каждый узел',
+    },
+    {
+      src: '/assets/img/calibre-open.webp',
+      caption: 'Анкерный ход в собранных часах: окно в циферблате',
+    },
+    {
+      src: '/assets/img/calibre-bench.webp',
+      caption: 'На столе мастера: часы и барабан рядом',
+    },
+    {
+      src: '/assets/img/watch-open-dial.webp',
+      caption: 'Открытый циферблат: сквозь прорезь виден ход колёсной передачи',
+    },
+    {
+      src: '/assets/img/watch-caseback.webp',
+      caption: 'Задняя крышка из сапфира: ротор и мосты под стеклом',
+    },
+    {
+      src: '/assets/img/watch-profile.webp',
+      caption: 'Профиль корпуса: полированный безель и сатиновая боковина',
+    },
+    {
+      src: '/assets/img/watch-gold.webp',
+      caption: 'Та же модель в золоте: циферблат цвета лосося',
     },
   ],
 };

@@ -43,9 +43,8 @@ function caseParts(size) {
 
   const back = lathe(
     [
-      [0.0, -0.575],
-      [0.4, -0.585],
-      [0.66, -0.605],
+      [0.81, -0.56],
+      [0.81, -0.605],
       [0.82, -0.615],
       [0.9, -0.6],
       [0.93, -0.56],
@@ -396,7 +395,8 @@ export function createWatch(options = {}) {
     sapphireMaterial(),
   );
   crystal.rotation.x = Math.PI / 2;
-  crystal.position.z = 0.065 - 6.4;
+  crystal.position.z = (0.20 - 6.4) * size / 38;
+  crystal.scale.setScalar(size / 38);
   group.add(crystal);
 
   /* Кромка стекла: без неё купол не читается — стекло выглядит отсутствующим. */
@@ -404,7 +404,7 @@ export function createWatch(options = {}) {
     new THREE.TorusGeometry((0.945 * size) / 38, (0.012 * size) / 38, 12, 128),
     new THREE.MeshStandardMaterial({ color: 0xdfe9ff, roughness: 0.05, metalness: 1, envMapIntensity: 2.6 }),
   );
-  crystalEdge.position.z = (0.012 * size) / 38;
+  crystalEdge.position.z = (0.13 * size) / 38;
   group.add(crystalEdge);
   nodes.crystal = crystal;
 
