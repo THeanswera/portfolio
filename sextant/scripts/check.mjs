@@ -395,6 +395,64 @@ try {
     else if (!body.includes('Страница не найдена')) fail('404: страница отдаёт не свой текст');
     else pass('404: неизвестный адрес отдаёт страницу «Страница не найдена»');
   }
+
+  /* --- 10. Галерея: карточка занимает колонку, подпись не закрывает кадр --- */
+  for (const width of [360, 1440]) {
+    const page = await browser.open(`${base}/gallery/`, { width });
+    await page.evaluate(`document.querySelectorAll('[data-reveal]').forEach((node) => node.classList.add('is-in'))`);
+    await page.evaluate(`(async () => {
+      const step = window.innerHeight * 0.7;
+      for (let y = 0; y < document.body.scrollHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((resolve) => setTimeout(resolve, 120));
+      }
+      window.scrollTo(0, 0);
+    })()`);
+    await sleep(800);
+
+    const gallery = await page.evaluate(`(() => {
+      const grid = document.querySelector('.gallery');
+      if (!grid) return { error: 'нет галереи' };
+
+      const column = parseFloat(getComputedStyle(grid).gridTemplateColumns.split(' ')[0]);
+      const items = [...grid.querySelectorAll('.gallery__item')].map((item) => {
+        const img = item.querySelector('img');
+        const caption = item.querySelector('.gallery__caption');
+        const itemRect = item.getBoundingClientRect();
+        const imgRect = img.getBoundingClientRect();
+        const captionRect = caption.getBoundingClientRect();
+
+        /* Подпись поверх снимка допустима, пока не закрывает его целиком. */
+        const overlap = captionRect.top < imgRect.bottom
+          ? (imgRect.bottom - Math.max(captionRect.top, imgRect.top)) / imgRect.height
+          : 0;
+
+        return { fill: imgRect.width / itemRect.width, overlap, loaded: img.naturalWidth > 0 };
+      });
+
+      return { count: items.length, column: Math.round(column), items };
+    })()`);
+
+    if (gallery.error) {
+      fail(`Галерея @${width}: ${gallery.error}`);
+    } else {
+      const empty = gallery.items.filter((item) => !item.loaded).length;
+      const narrow = gallery.items.filter((item) => item.fill < 0.85).length;
+      const covered = gallery.items.filter((item) => item.overlap > 0.6).length;
+
+      if (empty) fail(`Галерея @${width}: не загрузилось картинок — ${empty}`);
+      else if (narrow) fail(`Галерея @${width}: ${narrow} карточек уже своей колонки (${gallery.column}px)`);
+      else if (covered) fail(`Галерея @${width}: подпись закрывает кадр больше чем наполовину — ${covered} карточек`);
+      else {
+        pass(
+          `Галерея @${width}: ${gallery.count} карточек, все занимают колонку целиком ` +
+            `(${gallery.column}px), подписи не закрывают снимки`,
+        );
+      }
+    }
+
+    await page.close();
+  }
 } finally {
   await browser.close();
   if (local) await local.close();

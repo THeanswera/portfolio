@@ -342,6 +342,24 @@
 	background: linear-gradient(180deg, transparent, rgba(8, 8, 10, 0.92));
 }
 
+/* На телефоне карточка узкая, и подпись поверх снимка закрывает его целиком.
+   Уводим подпись под картинку: так видно и кадр, и то, что на нём. Картинке
+   при этом нельзя задавать высоту в процентах — она растягивается на всю
+   карточку и выталкивает подпись за её пределы. */
+@media (max-width: 860px) {
+	.gallery__item img {
+		height: auto;
+	}
+
+	.gallery__caption {
+		position: static;
+		padding: 10px 12px 12px;
+		font-size: 0.72rem;
+		background: none;
+		border-top: 1px solid var(--line);
+	}
+}
+
 /* --- Разбор калибра ----------------------------------------------------- */
 
 .explode {
