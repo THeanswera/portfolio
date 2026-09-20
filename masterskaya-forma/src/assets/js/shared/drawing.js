@@ -218,8 +218,12 @@ ${labels}
  */
 export function plan({ layout, wall, uid = 'p', accent = '#C08A52', line = '#39403B', surface = '#1D211E' }) {
   const run = Math.min(wall, 300);
-  const roomW = Math.round(run + 80);
-  const roomD = 300;
+  // Комната ровно по длине стены: гарнитур занимает её целиком, поэтому углы
+  // угловой и П-образной планировок смыкаются без разрыва. Раньше справа
+  // оставалась полоса в 80 см, из-за неё правый угол П-образной пустовал.
+  const roomW = Math.round(run);
+  // Острову нужен проход с двух сторон, поэтому комната глубже.
+  const roomD = layout === 'island' ? 360 : 300;
   const M = 20;
   const VW = roomW + M * 2;
   const VH = roomD + M * 2;
@@ -227,23 +231,29 @@ export function plan({ layout, wall, uid = 'p', accent = '#C08A52', line = '#394
 
   s.push(`<rect x="${M}" y="${M}" width="${roomW}" height="${roomD}" fill="none" class="d-line" vector-effect="non-scaling-stroke"/>`);
 
-  // вход: проём в нижней стене со створкой
+  // вход: проём в нижней стене со створкой. Ширина створки — не больше 40 %
+  // стены, иначе на короткой стене она выходит за габарит комнаты.
+  const doorW = Math.min(90, Math.round(roomW * 0.4));
   const doorX = M + roomW * 0.55;
-  s.push(`<line x1="${doorX}" y1="${M + roomD}" x2="${doorX + 90}" y2="${M + roomD}" stroke="var(--d-bg, #151816)" stroke-width="6" vector-effect="non-scaling-stroke"/>`);
-  s.push(`<path d="M${doorX} ${M + roomD} A90 90 0 0 1 ${doorX + 90} ${M + roomD - 90}" fill="none" class="d-line d-dash" vector-effect="non-scaling-stroke"/>`);
+  s.push(`<line x1="${doorX}" y1="${M + roomD}" x2="${doorX + doorW}" y2="${M + roomD}" stroke="var(--d-bg, #151816)" stroke-width="6" vector-effect="non-scaling-stroke"/>`);
+  s.push(`<path d="M${doorX} ${M + roomD} A${doorW} ${doorW} 0 0 1 ${doorX + doorW} ${M + roomD - doorW}" fill="none" class="d-line d-dash" vector-effect="non-scaling-stroke"/>`);
 
   const cabinet = (x, y, w, h) =>
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${surface}" stroke="${accent}" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
 
-  // основная стена
-  s.push(cabinet(M, M, run, 60));
+  // основная стена — во всю ширину комнаты
+  s.push(cabinet(M, M, roomW, 60));
   if (layout === 'corner' || layout === 'u') s.push(cabinet(M, M + 60, 60, 120));
   if (layout === 'u') s.push(cabinet(M + roomW - 60, M + 60, 60, 120));
-  if (layout === 'island') s.push(cabinet(M + roomW / 2 - 90, M + 150, 180, 90));
+  if (layout === 'island') {
+    // Остров короче стены, иначе он упирается в боковые стены узкой комнаты.
+    const islandW = Math.round(Math.min(180, roomW * 0.6) / 10) * 10;
+    s.push(cabinet(M + (roomW - islandW) / 2, M + 150, islandW, 90));
+  }
 
   // мойка и варочная зона на основной стене
-  const sinkX = M + run * 0.3;
-  const hobX = M + run * 0.68;
+  const sinkX = M + roomW * 0.3;
+  const hobX = M + roomW * 0.68;
   s.push(`<circle cx="${sinkX}" cy="${M + 30}" r="13" fill="none" class="d-line" vector-effect="non-scaling-stroke"/>`);
   s.push(`<circle cx="${sinkX}" cy="${M + 30}" r="4" fill="${accent}" opacity="0.7"/>`);
   for (const [dx, dy] of [[-9, -9], [9, -9], [-9, 9], [9, 9]]) {

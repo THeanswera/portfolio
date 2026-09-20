@@ -158,6 +158,52 @@ try {
     if (drawing > 30) pass(`Конфигуратор: чертёж перерисован (${drawing} элементов в SVG)`);
     else fail(`Конфигуратор: чертёж пустой (${drawing} элементов)`);
 
+    /* --- План: гарнитур занимает верхние углы комнаты --- */
+    // Раньше комната рисовалась на 80 см шире стены, и в правом верхнем углу
+    // П-образной планировки оставалась пустая полоса. Проверяем углы у всех
+    // планировок: основная стена идёт во всю ширину комнаты.
+    const planCorners = async (layoutId) => {
+      await page.evaluate(`document.querySelector('[data-set="layout"][data-value="${layoutId}"]').click()`);
+      await sleep(250);
+      return page.evaluate(`(() => {
+        const rects = [...document.querySelectorAll('[data-plan] svg rect')].map((el) => ({
+          x: Number(el.getAttribute('x')),
+          y: Number(el.getAttribute('y')),
+          w: Number(el.getAttribute('width')),
+          h: Number(el.getAttribute('height')),
+          room: el.getAttribute('fill') === 'none',
+        }));
+        const room = rects.find((item) => item.room);
+        const cabinets = rects.filter((item) => !item.room);
+        if (!room || !cabinets.length) return { error: 'план не нарисован' };
+        const inside = (px, py) => cabinets.some((c) => px >= c.x - 0.5 && px <= c.x + c.w + 0.5 && py >= c.y - 0.5 && py <= c.y + c.h + 0.5);
+        const probes = [];
+        for (let dx = 5; dx <= 55; dx += 5) {
+          for (let dy = 5; dy <= 55; dy += 5) {
+            probes.push([room.x + dx, room.y + dy], [room.x + room.w - dx, room.y + dy]);
+          }
+        }
+        return {
+          total: probes.length,
+          covered: probes.filter(([px, py]) => inside(px, py)).length,
+          roomW: Math.round(room.w),
+          runRight: Math.round(Math.max(...cabinets.map((c) => c.x + c.w))),
+          roomRight: Math.round(room.x + room.w),
+        };
+      })()`);
+    };
+
+    for (const layoutId of ['line', 'corner', 'u', 'island']) {
+      const probe = await planCorners(layoutId);
+      if (probe.error) {
+        fail(`План «${layoutId}»: ${probe.error}`);
+      } else if (probe.covered === probe.total && probe.runRight === probe.roomRight) {
+        pass(`План «${layoutId}»: стена ${probe.roomW} см, углы заняты гарнитуром (${probe.covered}/${probe.total} точек)`);
+      } else {
+        fail(`План «${layoutId}»: пустой угол — занято ${probe.covered} из ${probe.total} точек, стена кончается на ${probe.runRight} при комнате ${probe.roomRight}`);
+      }
+    }
+
     await page.evaluate(`document.querySelector('[data-lead-open]').click()`);
     await sleep(300);
     const modalOpen = await page.evaluate(`!document.querySelector('[data-lead]').hidden`);
