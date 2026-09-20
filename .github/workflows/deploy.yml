@@ -76,7 +76,7 @@ jobs:
         if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
         working-directory: portfolio-site
         env:
-          FTP_DIR: /www/rootlost.online
+          FTP_DIR: /www/rootlost.ru
         run: node scripts/deploy.mjs
 
       - name: Выгрузка демо-сайта
@@ -97,23 +97,23 @@ jobs:
         if: inputs.target == 'sextant'
         env:
           FTP_SRC: sextant/dist
-          FTP_DIR: /www/rootlost.online/sextant
+          FTP_DIR: /www/rootlost.ru/sextant
         run: node portfolio-site/scripts/deploy.mjs
 
       - name: Выгрузка темы «КИТ-Строй.Москва»
         if: inputs.target == 'kitstroy'
         env:
           FTP_SRC: kitstroy-moscow
-          FTP_DIR: /www/rootlost.ru/wp-content/themes/kitstroy-moscow
+          FTP_DIR: /www/rootlost.online/wp-content/themes/kitstroy-moscow
         run: node portfolio-site/scripts/deploy.mjs
 
       - name: Проверка живых сайтов
         run: |
-          curl -s -o /dev/null -w "rootlost.online → %{http_code}\n" --max-time 30 https://rootlost.online/
+          curl -s -o /dev/null -w "rootlost.ru → %{http_code}\n" --max-time 30 https://rootlost.ru/
           curl -s -o /dev/null -w "masterskaya-forma.ru → %{http_code}\n" --max-time 30 https://masterskaya-forma.ru/
           if [ "${{ inputs.target }}" = "kitstroy" ]; then
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://rootlost.ru/)
-            echo "rootlost.ru → $code"
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://rootlost.online/)
+            echo "rootlost.online → $code"
             if [ "$code" != "200" ]; then
               echo "Тема не отвечает: проверьте вывод PHP на хостинге."
               exit 1
@@ -128,8 +128,8 @@ jobs:
             fi
           fi
           if [ "${{ inputs.target }}" = "sextant" ]; then
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://rootlost.online/sextant/)
-            echo "rootlost.online/sextant → $code"
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://rootlost.ru/sextant/)
+            echo "rootlost.ru/sextant → $code"
             if [ "$code" != "200" ]; then
               echo "«СЕКСТАНТ» не отвечает: проверьте выгрузку в подпапку."
               exit 1

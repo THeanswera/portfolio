@@ -31,5 +31,5 @@ Vite + React + TypeScript, Tailwind CSS 4, lucide-react. Анимации — CS
 скриптом `scripts/check-responsive.mjs`.
 
 ## Публикация
-Портфолио — `https://rootlost.online/`, кейсы — там же. Демо-сайт мастерской — отдельный проект
+Портфолио — `https://rootlost.ru/`, кейсы — там же. Демо-сайт мастерской — отдельный проект
 на своём домене `https://masterskaya-forma.ru/`.

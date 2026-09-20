@@ -13,7 +13,7 @@ export const site = {
   name: 'СЕКСТАНТ',
   latin: 'Sextant',
   tagline: 'Часовая мануфактура, Санкт-Петербург',
-  url: 'https://rootlost.online/sextant',
+  url: 'https://rootlost.ru/sextant',
   email: 'hello@sextant.ru',
   phone: '+7\u00A0812\u00A0000-00-00',
   phoneHref: '+78120000000',

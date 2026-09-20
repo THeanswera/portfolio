@@ -12,6 +12,7 @@
     "check:visual": "node scripts/audit-visual.mjs",
     "check:images": "node scripts/case-shots.mjs",
     "check:mojibake": "node scripts/check-mojibake.mjs src html,css,ts,tsx,mjs",
+    "check:domains": "node scripts/check-domains.mjs",
     "deploy": "node scripts/deploy.mjs",
     "verify:live": "node scripts/verify-live.mjs"
   },

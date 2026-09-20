@@ -94,7 +94,9 @@ context/                   бриф проекта, дизайн-концепц�
 
 ## Деплой на хостинг reg.ru
 
-Сайт опубликован: **http://rootlost.online/** (папка `/www/rootlost.online` на хостинге `31.31.196.221`).
+Сайт опубликован: **https://rootlost.ru/** (папка `/www/rootlost.ru` на хостинге `31.31.196.221`).
+Сайт инженерного подрядчика «КИТ-Строй.Москва» живёт на `rootlost.online` — домены поменялись
+местами 20.09.2026, вместе с папками на хостинге.
 
 Порядок публикации:
 
@@ -102,9 +104,9 @@ context/                   бриф проекта, дизайн-концепц�
 npm run build                     # сборка в dist/
 $env:FTP_USER='...'               # FTP-пользователь
 $env:FTP_PASS='...'               # пароль (в файлах не хранится)
-$env:FTP_DIR='/www/rootlost.online'
+$env:FTP_DIR='/www/rootlost.ru'
 npm run deploy                    # загрузка содержимого dist по FTP
-npm run verify:live -- http://rootlost.online/   # проверка в браузере
+npm run verify:live -- http://rootlost.ru/   # проверка в браузере
 ```
 
 `scripts/deploy.mjs` загружает только содержимое `dist`, создаёт вложенные папки и передаёт пароль через
@@ -114,26 +116,25 @@ npm run verify:live -- http://rootlost.online/   # проверка в брау�
 Тем же скриптом публикуются соседние проекты — через переменную `FTP_SRC`:
 
 ```powershell
-# тема WordPress для rootlost.ru
-$env:FTP_DIR='/www/rootlost.ru/wp-content/themes/kitstroy-moscow'
+# тема WordPress для rootlost.online
+$env:FTP_DIR='/www/rootlost.online/wp-content/themes/kitstroy-moscow'
 $env:FTP_SRC='D:\фриланс\Portfolio\Корпоративный сайт\kitstroy-moscow'
 npm run deploy
 
 # демонстрационный сайт сервисного центра в подпапке портфолио
-$env:FTP_DIR='/www/rootlost.online/remont'
+$env:FTP_DIR='/www/rootlost.ru/remont'
 $env:FTP_SRC='D:\фриланс\Portfolio\2_корп сайт Sergey_aoqado\repair-site'
 npm run deploy
 ```
 
 Резервная копия перед изменениями: `node scripts/ftp-pull.mjs <удалённая-папка> <локальная-папка>`
-(так сохранены прежняя версия rootlost.online в `.backup/rootlost.online-2026-04-03/` и тема
-rootlost.ru в `.backup/rootlost.ru-theme-before-changes/`).
+(так сохранены прежняя версия портфолио в `.backup/rootlost.online-2026-04-03/` и тема
+`rootlost.ru` в `.backup/rootlost.ru-theme-before-changes/`).
 
 Важно:
 
 - заливать нужно **содержимое** `dist`, не удаляя файлы вне папки сайта (`.env`, `uploads` на других доменах);
 - сборка использует относительные пути (`base: './'`), поэтому работает и в корне домена, и в подпапке;
-- на домене `rootlost.online` не установлен SSL-сертификат: `http://` открывается, `https://` — нет.
-  Включается в панели reg.ru (Let's Encrypt). Пока сертификата нет, `canonical` и `og:url` в `index.html`
-  указывают на `https://` — если HTTPS включить нельзя, замените их на `http://` и пересоберите.
+- SSL-сертификаты стоят на обоих доменах: и `http`, и `https` отвечают 200. После обмена доменами
+  `canonical` и `og:url` пересобираются вместе с сайтом — руками их править не нужно;
 - резервная копия предыдущей версии сайта с этого домена лежит в `.backup/rootlost.online-2026-04-03/`.

@@ -6,10 +6,10 @@
 
 | Проект | Что это | Живой адрес |
 | --- | --- | --- |
-| [`portfolio-site/`](portfolio-site/) | Сайт-портфолио: услуги, работы с разбором, процесс, контакты | https://rootlost.online/ |
-| [`sextant/`](sextant/) | Сайт часовой мануфактуры: 3D-калибр на WebGL, разборка механизма и конфигуратор | https://rootlost.online/sextant/ |
+| [`portfolio-site/`](portfolio-site/) | Сайт-портфолио: услуги, работы с разбором, процесс, контакты | https://rootlost.ru/ |
+| [`sextant/`](sextant/) | Сайт часовой мануфактуры: 3D-калибр на WebGL, разборка механизма и конфигуратор | https://rootlost.ru/sextant/ |
 | [`masterskaya-forma/`](masterskaya-forma/) | Демо-сайт мастерской кухонь с конфигуратором | https://masterskaya-forma.ru/ |
-| [`kitstroy-moscow/`](kitstroy-moscow/) | Тема WordPress для подрядчика инженерных систем с калькулятором | https://rootlost.ru/ |
+| [`kitstroy-moscow/`](kitstroy-moscow/) | Тема WordPress для подрядчика инженерных систем с калькулятором | https://rootlost.online/ |
 | [`sertexity/`](sertexity/) | Промо-сайт платформы AI-арбитража: глобус на Canvas и калькулятор доходности | https://masterskaya-forma.online/ |
 
 ## Чем интересен сайт часовой мануфактуры
@@ -96,12 +96,13 @@ npm ci
 npm run build        # типы и сборка в dist/
 npm run dev          # локальная разработка
 npm run check:responsive   # приёмка в браузере на 360, 768 и 1440
+npm run check:domains      # живые домены отдают те сайты, которые должны
 
 # Демо-сайт мастерской (зависимостей нет вовсе)
 cd masterskaya-forma
 node build.mjs       # сборка в dist/
 node scripts/serve.mjs     # локальный просмотр
-node scripts/check.mjs     # 50 проверок в браузере
+node scripts/check.mjs     # 54 проверки в браузере
 
 # Тема WordPress для инженерного подрядчика
 cd kitstroy-moscow
@@ -111,7 +112,7 @@ node build.mjs       # SCSS в CSS и скрипты в assets/dist
 cd sertexity
 node build.mjs             # сборка в dist/
 node scripts/serve.mjs     # локальный просмотр
-node scripts/check.mjs     # 39 проверок в браузере
+node scripts/check.mjs     # 42 проверки в браузере
 
 # Сайт часовой мануфактуры (зависимостей нет, three.js лежит в src/vendor)
 cd sextant
@@ -132,7 +133,7 @@ SEXTANT_BASE=/sextant node build.mjs
 Цели: `portfolio` — сайт-портфолио, `masterskaya` — демо-сайт мастерской,
 `kitstroy` — тема WordPress в `wp-content/themes/kitstroy-moscow`,
 `sertexity` — промо-сайт на `masterskaya-forma.online`,
-`sextant` — сайт мануфактуры в подпапку `rootlost.online/sextant/`.
+`sextant` — сайт мануфактуры в подпапку `rootlost.ru/sextant/`.
 Локально доступы лежат в `.env.ftp` в корне репозитория (в git не попадает),
 в CI — в секретах `FTP_HOST`, `FTP_USER`, `FTP_PASS`.
 

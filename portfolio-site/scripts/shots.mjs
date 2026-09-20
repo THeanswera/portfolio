@@ -140,10 +140,10 @@ async function capture({ url, out, width, height, cleanup = true }) {
 
 const localRoot = path.resolve('..');
 const targets = [
-  { id: 'kitstroy', url: 'https://rootlost.ru/' },
+  { id: 'kitstroy', url: 'https://rootlost.online/' },
   { id: 'sincere', url: 'https://sincere-family.ru/' },
   { id: 'wedding', url: 'https://odinzovi-svadba-pela-i-plyasala.ru/' },
-  { id: 'technoremont', url: 'https://rootlost.online/remont/' },
+  { id: 'technoremont', url: 'https://rootlost.ru/remont/' },
   { id: 'sertexity', url: pathToFileURL(path.join(localRoot, '0_verstka_po_maketu/index.html')).href },
 ];
 

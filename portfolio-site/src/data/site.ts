@@ -147,8 +147,8 @@ export const works: Work[] = [
     stack: ['HTML5', 'CSS3', 'JavaScript', 'Three.js', 'WebGL', 'Canvas 2D', 'PHP', 'JSON-LD', 'Open Graph'],
     value:
       'Проверено вживую: 53 проверки в браузере — одиннадцать страниц на трёх ширинах без переполнения, ноль ошибок в консоли и битых запросов, все три сцены рисуются (43 508 и 134 934 треугольника в кадре), разборка, конфигуратор, аккордеон, меню и форма работают. Вес главной по сети — 458 КБ, из них three.js 184 КБ.',
-    url: 'https://rootlost.online/sextant/',
-    urlLabel: 'rootlost.online/sextant',
+    url: 'https://rootlost.ru/sextant/',
+    urlLabel: 'rootlost.ru/sextant',
     shot: '/shots/sextant.webp',
     scrollShot: '/shots/sextant-full.webp',
     year: '2026',
@@ -316,8 +316,8 @@ export const works: Work[] = [
     stack: ['WordPress', 'PHP', 'SCSS', 'JavaScript', 'ACF', 'CPT', 'JSON-LD'],
     value:
       'Проверено вживую: 11 страниц отвечают 200, ошибок PHP нет, горизонтального переполнения нет на телефоне, планшете и большом экране. Калькулятор пересчитывает смету без перезагрузки, заявка собирает состав работ в письмо.',
-    url: 'https://rootlost.ru/',
-    urlLabel: 'rootlost.ru',
+    url: 'https://rootlost.online/',
+    urlLabel: 'rootlost.online',
     shot: '/shots/kitstroy.webp',
     scrollShot: '/shots/kitstroy-full.webp',
     year: '2026',
@@ -389,8 +389,8 @@ export const works: Work[] = [
     stack: ['HTML5', 'CSS3', 'JavaScript', 'Адаптив', 'ARIA', 'JSON-LD'],
     value:
       'Проверено вживую: девять страниц и все ассеты отвечают 200, внутренние ссылки и якоря валидны, переполнения нет, ошибок JavaScript нет.',
-    url: 'https://rootlost.online/remont/',
-    urlLabel: 'rootlost.online/remont',
+    url: 'https://rootlost.ru/remont/',
+    urlLabel: 'rootlost.ru/remont',
     shot: '/shots/technoremont.webp',
     scrollShot: '/shots/technoremont-full.webp',
     year: '2026',
@@ -496,7 +496,7 @@ export const works: Work[] = [
     ],
     stack: ['HTML5', 'CSS3', 'JavaScript', 'Canvas 2D', 'PHP', 'JSON-LD', 'Open Graph'],
     value:
-      'Проверено вживую: 41 проверка в браузере — девять страниц на трёх ширинах без переполнения, ноль ошибок в консоли и битых запросов, глобус тянется мышью и показывает площадку при наведении, калькулятор пересчитывает итог и строит график, форма проверяет данные на сервере. Вес главной со шрифтами — 160 КБ.',
+      'Проверено вживую: 42 проверки в браузере — девять страниц на трёх ширинах без переполнения, ноль ошибок в консоли и битых запросов, глобус тянется мышью и показывает площадку при наведении, калькулятор пересчитывает итог и строит график, форма проверяет данные на сервере. Вес главной со шрифтами — 161 КБ.',
     url: 'https://masterskaya-forma.online/',
     urlLabel: 'masterskaya-forma.online',
     shot: '/shots/sertexity.webp',
@@ -507,8 +507,8 @@ export const works: Work[] = [
     facts: [
       { label: 'Страниц', value: '9' },
       { label: 'Внешних библиотек', value: '0' },
-      { label: 'Проверок', value: '41' },
-      { label: 'Вес главной', value: '160 КБ' },
+      { label: 'Проверок', value: '42' },
+      { label: 'Вес главной', value: '161 КБ' },
     ],
     blocks: [
       {
