@@ -18,6 +18,10 @@
 	justify-content: space-between;
 	gap: 20px;
 	min-height: 76px;
+	// Строка не переносится: перенос читается как ошибка вёрстки. Вместо этого
+	// группы отключаются по одной на своих ширинах ($header-phone, $header-menu),
+	// и до края контейнера всегда остаётся запас.
+	flex-wrap: nowrap;
 }
 
 .site-header__logo {
@@ -71,7 +75,9 @@
 
 .site-menu {
 	display: flex;
-	gap: 22px;
+	// Зазор 14px вместо 22: при контейнере 1280px строка упиралась в край,
+	// и флекс сжимал меню — «Как работаем» и «О компании» ломались на две строки.
+	gap: 14px;
 	font-size: 0.92rem;
 	color: var(--fg-soft);
 }
@@ -79,6 +85,8 @@
 .site-menu a {
 	position: relative;
 	padding: 6px 0;
+	// Пункт меню всегда одной строкой: перенос читается как ошибка вёрстки.
+	white-space: nowrap;
 	transition: color var(--transition);
 }
 
@@ -110,6 +118,12 @@
 
 .site-header__contacts {
 	gap: 16px;
+}
+
+// Кнопка в шапке — в одну строку: «Рассчитать стоимость» переносилось
+// и кнопка превращалась в двухэтажный прямоугольник.
+.site-header__cta {
+	white-space: nowrap;
 }
 
 .site-header__phone {
@@ -195,15 +209,32 @@
 	font-size: 0.9rem;
 }
 
-@media (max-width: $tablet) {
+// Шапка живёт в трёх состояниях: полная строка, строка без телефона и бургер.
+// Раньше переключение было одно, на 991px, и в диапазоне 992–1280 меню сжималось
+// до переносов, а на 1024 страница получала горизонтальную прокрутку.
+@media (max-width: $header-phone) {
+	// Телефон не помещается рядом с меню: он остаётся в подвале и в мобильном меню.
+	.site-header__phone {
+		display: none;
+	}
+}
+
+@media (max-width: $header-menu) {
 	.site-header__nav,
-	.site-header__cta,
-	.site-header__note {
+	// Класс шапки в селекторе не лишний: `components/buttons` подключается после
+	// `layout/header`, и `display: inline-flex` у `.button` перебивал скрытие —
+	// кнопка оставалась в шапке на телефоне и распирала строку.
+	.site-header .site-header__cta {
 		display: none;
 	}
 
 	.site-header__burger {
 		display: inline-flex;
+	}
+
+	// Без меню и кнопки место освобождается — телефон возвращаем в шапку.
+	.site-header__phone {
+		display: block;
 	}
 
 	.site-header__inner {
