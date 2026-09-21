@@ -48,12 +48,33 @@ DirectoryIndex index.html
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteCond %{REQUEST_URI} !/$
   RewriteRule ^(.*)$ /$1/ [R=301,L]
+
+  # --- 4. Адреса прежнего сайта на WordPress: страницы удалены навсегда ---
+  # В поиске они ещё видны, поэтому отвечаем 410 Gone — это точнее, чем 404:
+  # робот понимает, что документ не вернётся, и убирает его быстрее.
+  # Перенаправлять их на главную нельзя: это разные темы, и такой переход
+  # поисковики считают подменой.
+  RewriteRule ^services(/.*)?$ - [G,L]
+  RewriteRule ^20[0-9]{2}(/[0-9]{2})?(/.*)?$ - [G,L]
+  RewriteRule ^(category|tag|author)(/.*)?$ - [G,L]
+  RewriteRule ^(hello-world|sample-page)(/.*)?$ - [G,L]
+  RewriteRule ^(wp-content|wp-includes|wp-json|wp-admin)(/.*)?$ - [G,L]
+  # Точные адреса, а не префиксы: правило ^feed иначе задело бы, например, /feedback.
+  RewriteRule ^wp-login\.php$ - [G,L]
+  RewriteRule ^xmlrpc\.php$ - [G,L]
+  RewriteRule ^feed/?$ - [G,L]
+  RewriteRule ^comments/feed/?$ - [G,L]
+  RewriteRule ^wp-sitemap.*$ - [G,L]
+  RewriteRule ^sitemap_index\.xml$ - [G,L]
 </IfModule>
 
-# --- 4. Страница ошибки ---
+# --- 5. Страницы ошибок ---
+# Обе отдают нашу разметку: у 404 и 410 один смысл для посетителя —
+# «здесь ничего нет, вот куда идти».
 ErrorDocument 404 /404.html
+ErrorDocument 410 /404.html
 
-# --- 5. Кеширование ---
+# --- 6. Кеширование ---
 <IfModule mod_headers.c>
   # HTML не кешируем надолго: после выкладки должна приезжать новая разметка,
   # а не ссылки на уже удалённые файлы сборки.
@@ -67,7 +88,7 @@ ErrorDocument 404 /404.html
   </FilesMatch>
 </IfModule>
 
-# --- 6. Зеркала ---
+# --- 7. Зеркала ---
 # Редирект с http и с www включаем после проверки заголовков на сервере:
 # у REG.RU схему сообщает X-Forwarded-Proto, а без этого правила можно получить
 # цикл. Точные строки и порядок проверки — в отчёте, раздел «Серверная часть».

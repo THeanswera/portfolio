@@ -233,10 +233,29 @@ if (!htaccess) {
     }
   }
   if (!/ErrorDocument 404 \/404\.html/.test(htaccess)) fail('.htaccess: страница ошибки не подключена');
+  if (!/ErrorDocument 410 \/404\.html/.test(htaccess)) {
+    fail('.htaccess: для удалённых адресов не подключена страница 410');
+  }
   if (!/RewriteRule \^case\\\.html\$ \/cases\/ \[R=301,L\]/.test(htaccess)) {
     fail('.htaccess: старый адрес без параметра не ведёт в каталог кейсов');
   }
   if (!/THE_REQUEST[^\n]*index\\\.html/.test(htaccess)) fail('.htaccess: нет перехода с index.html на адрес каталога');
+
+  // В поиске ещё видны адреса прежнего сайта на WordPress — они должны отвечать
+  // 410 Gone, а не отдавать 404 «не найдено» и не вести на главную.
+  const gone = [
+    { pattern: '^services(/.*)?$', what: '/services/' },
+    { pattern: '^20[0-9]{2}(/[0-9]{2})?(/.*)?$', what: 'записи блога по датам (/2026/03/11/hello-world/)' },
+    { pattern: '^(category|tag|author)(/.*)?$', what: 'рубрики, метки и авторы' },
+    { pattern: '^wp-login\\.php$', what: '/wp-login.php' },
+  ];
+
+  for (const rule of gone) {
+    if (!htaccess.includes(rule.pattern)) fail(`.htaccess: нет ответа 410 для ${rule.what}`);
+  }
+  if (!/\^wp-sitemap\.\*\$ - \[G,L\]/.test(htaccess) && !htaccess.includes('^wp-sitemap.*$ - [G,L]')) {
+    fail('.htaccess: карта сайта прежнего WordPress не закрыта');
+  }
 }
 
 // 6. На главной и на страницах кейсов должны быть контакты без JavaScript.
