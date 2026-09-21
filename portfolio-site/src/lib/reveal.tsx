@@ -27,6 +27,10 @@ export function initReveal() {
   if (started || typeof window === 'undefined') return;
   started = true;
 
+  // Класс js включает анимацию появления: в исходном HTML блокам с data-reveal
+  // ничего не скрывает, поэтому текст виден и без исполнения скрипта.
+  document.documentElement.classList.add('js');
+
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (!('IntersectionObserver' in window) || reduced) {

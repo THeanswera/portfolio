@@ -1,19 +1,27 @@
 import { useMemo, useState } from 'react';
-import { ArrowUpRight, Check, Mail, RotateCcw, Send } from 'lucide-react';
+import { ArrowUpRight, Mail, RotateCcw, Send } from 'lucide-react';
 import { site } from '../data/site';
+import { privacyUrl } from '../lib/links';
 import { Reveal } from '../lib/reveal';
+import { MessageBuilder } from './MessageBuilder';
 
+/**
+ * Шаги квиза. Раньше первый шаг смешивал тип работы и наличие макета: можно было
+ * выбрать «Лендинг по макету» вместе с «Только идея и описание» и получить
+ * противоречивую заявку. Теперь тип работы и материалы — разные вопросы.
+ */
 const questions = [
   {
     id: 'goal',
     title: 'Что нужно сделать?',
     hint: 'Выберите подходящий вариант',
     options: [
-      'Лендинг по макету',
-      'Корпоративный сайт, несколько страниц',
-      'Сайт на WordPress с админкой',
-      'Правки и поддержка существующего сайта',
-      'Пока не знаю, нужна консультация',
+      'Лендинг с нуля',
+      'Вёрстка по готовому макету',
+      'Многостраничный сайт',
+      'WordPress с редактированием',
+      'Доработка существующего сайта',
+      'Нужна консультация',
     ],
   },
   {
@@ -22,8 +30,9 @@ const questions = [
     hint: 'Поможет оценить сроки',
     options: [
       'Готовый макет в Figma',
+      'Техническое задание или описание',
       'Старый сайт, который нужно обновить',
-      'Только идея и описание',
+      'Только идея',
     ],
   },
   {
@@ -42,14 +51,21 @@ const summaryLabels: Record<string, string> = {
   time: 'Срок',
 };
 
+/** Вопрос шага, на котором нужно уточнение. */
+const clarification: Record<string, string> = {
+  'Вёрстка по готовому макету':
+    'Для вёрстки по макету нужен файл Figma. Если макета нет — это уже не вёрстка, а сборка сайта с нуля: напишите об этом в комментарии, и я предложу структуру.',
+  'Готовый макет в Figma': 'Пришлите ссылку на макет — посмотрю сетку и состояния элементов до оценки.',
+  'Доработка существующего сайта': 'Напишите адрес сайта и что именно не устраивает: так оценка будет точнее.',
+};
+
 export function Contact() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [comment, setComment] = useState('');
-  const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'copied'>('idle');
 
   const finished = step >= questions.length;
+  const current = questions[step];
 
   const message = useMemo(() => {
     const lines = [
@@ -64,31 +80,20 @@ export function Contact() {
   }, [answers, comment]);
 
   const choose = (value: string) => {
-    const current = questions[step];
     if (!current) return;
     setAnswers((prev) => ({ ...prev, [current.id]: value }));
     setStep((prev) => Math.min(prev + 1, questions.length));
-    setStatus('idle');
   };
 
-  const sendToTelegram = async () => {
-    try {
-      await navigator.clipboard.writeText(message);
-      setStatus('copied');
-    } catch {
-      setStatus('idle');
-    }
-    window.open(site.telegram, '_blank', 'noopener,noreferrer');
-  };
+  const back = () => setStep((prev) => Math.max(0, prev - 1));
 
   const reset = () => {
     setAnswers({});
     setComment('');
     setStep(0);
-    setStatus('idle');
   };
 
-  const current = questions[step];
+  const hint = current ? clarification[answers[current.id] ?? ''] ?? null : null;
 
   return (
     <section id="contact" className="section bg-ink text-paper">
@@ -100,7 +105,7 @@ export function Contact() {
                 <div className="flex items-center gap-4">
                   <p className="label-mono text-paper/60">Связь</p>
                   <span className="h-px flex-1 bg-paper/20" aria-hidden="true" />
-                  <p className="index-num">05 / 05</p>
+                  <p className="index-num">06 / 06</p>
                 </div>
                 <h2 className="mt-6 text-[34px] leading-[1.02] font-extrabold text-paper sm:text-4xl lg:text-[52px]">
                   Какой сайт вам нужен?
@@ -156,7 +161,8 @@ export function Contact() {
 
             <Reveal delay={140}>
               <p className="label-mono mt-6 leading-relaxed text-paper/50">
-                Отвечу лично в течение дня · Смотрю задачу до обсуждения цены
+                Отвечу лично в течение дня · Смотрю задачу до обсуждения цены · Telegram не
+                обязателен: пишите на почту
               </p>
             </Reveal>
           </div>
@@ -181,7 +187,9 @@ export function Contact() {
 
               {!finished && current ? (
                 <div className="mt-6">
-                  <h3 className="font-display text-2xl font-bold text-paper">{current.title}</h3>
+                  <h3 id="quiz-step-title" className="font-display text-2xl font-bold text-paper">
+                    {current.title}
+                  </h3>
                   <p className="label-mono mt-2 text-paper/50">{current.hint}</p>
 
                   <div className="mt-5 flex flex-col gap-2">
@@ -189,6 +197,7 @@ export function Contact() {
                       <button
                         key={option}
                         type="button"
+                        aria-pressed={answers[current.id] === option}
                         onClick={() => choose(option)}
                         className="group flex min-h-12 items-center gap-3 border border-paper/20 px-4 text-left text-[15px] text-paper/75 transition-colors hover:border-accent hover:text-paper"
                       >
@@ -201,10 +210,16 @@ export function Contact() {
                     ))}
                   </div>
 
+                  {hint && (
+                    <p className="mt-5 border-l-2 border-accent pl-3 text-[13px] leading-relaxed text-paper/60">
+                      {hint}
+                    </p>
+                  )}
+
                   {step > 0 && (
                     <button
                       type="button"
-                      onClick={() => setStep((prev) => Math.max(0, prev - 1))}
+                      onClick={back}
                       className="label-mono mt-5 text-paper/60 transition-colors hover:text-paper"
                     >
                       ← Назад
@@ -238,61 +253,17 @@ export function Contact() {
                     className="mt-2 w-full resize-none border border-paper/25 bg-ink px-4 py-3 text-[15px] text-paper placeholder:text-paper/40 focus:border-accent focus:outline-none"
                   />
 
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                    <button
-                      type="button"
-                      onClick={sendToTelegram}
-                      disabled={!consent}
-                      className="btn flex-1 bg-accent text-paper hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Отправить в Telegram
-                      <ArrowUpRight className="size-4" aria-hidden="true" />
-                    </button>
-                    <a
-                      href={
-                        consent
-                          ? `mailto:${site.email}?subject=${encodeURIComponent('Задача по сайту')}&body=${encodeURIComponent(message)}`
-                          : undefined
-                      }
-                      aria-disabled={!consent}
-                      onClick={(event) => {
-                        if (!consent) event.preventDefault();
-                      }}
-                      className={`btn flex-1 border border-paper/40 text-paper hover:bg-paper hover:text-ink ${
-                        consent ? '' : 'cursor-not-allowed opacity-40'
-                      }`}
-                    >
-                      Отправить на почту
-                    </a>
-                  </div>
-
-                  <label className="mt-4 flex items-start gap-3 text-[13px] leading-relaxed text-paper/60">
-                    <input
-                      type="checkbox"
-                      checked={consent}
-                      required
-                      onChange={(event) => setConsent(event.target.checked)}
-                      className="mt-1 size-4 shrink-0 accent-[#d33a1c]"
+                  <div className="mt-6">
+                    <MessageBuilder
+                      idPrefix="quiz"
+                      tone="dark"
+                      requireConsent
+                      heading="Готовое сообщение"
+                      note="Проверьте текст — его можно поправить в комментарии выше. Копирование и отправка разделены: сначала скопируйте, потом вставьте в чат или письмо."
+                      subject="Задача по сайту"
+                      message={message}
                     />
-                    <span>
-                      Согласен на обработку персональных данных и с{' '}
-                      <a
-                        href="privacy.html"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="link-draw text-paper"
-                      >
-                        политикой конфиденциальности
-                      </a>
-                    </span>
-                  </label>
-
-                  {status === 'copied' && (
-                    <p className="mt-4 flex items-start gap-2 text-[13px] leading-relaxed text-accent-soft">
-                      <Check className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                      Текст заявки скопирован — вставьте его в чат Telegram, и я отвечу.
-                    </p>
-                  )}
+                  </div>
 
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                     <button
@@ -303,9 +274,14 @@ export function Contact() {
                       <RotateCcw className="size-3.5" aria-hidden="true" />
                       Заполнить заново
                     </button>
-                    <p className="label-mono max-w-[250px] text-right leading-relaxed text-paper/40">
-                      Форма ничего не отправляет на сервер: она готовит текст и открывает чат.
-                    </p>
+                    <a
+                      href={privacyUrl()}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="label-mono text-paper/40 transition-colors hover:text-paper/70"
+                    >
+                      Политика конфиденциальности
+                    </a>
                   </div>
                 </div>
               )}

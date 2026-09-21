@@ -26,7 +26,6 @@
     <meta property="og:image" content="https://rootlost.ru/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Александра Мельникова — верстка и разработка сайтов" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <script type="application/ld+json">
@@ -42,7 +41,12 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!--
+      Контейнер, в который сборка складывает готовую разметку главной страницы.
+      Разметку снимает scripts/prerender.mjs: поэтому текст, заголовок и ссылки
+      видны в исходном HTML, а тот же скрипт после загрузки оживляет страницу.
+    -->
+    <div id="prerender-root"></div>
+    <script type="module" src="/src/entries/render.tsx"></script>
   </body>
 </html>

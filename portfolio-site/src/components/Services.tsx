@@ -33,7 +33,7 @@ export function Services() {
       <div className="container-x">
         <Reveal>
           <SectionHead
-            index="01 / 05"
+            index="01 / 06"
             label="Услуги"
             title="Что можно отдать в работу"
             text="Шесть направлений: от сайта под ключ по вашей идее до точечных правок в готовом проекте."

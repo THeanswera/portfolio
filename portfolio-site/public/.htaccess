@@ -1,0 +1,73 @@
+# rootlost.ru — портфолио. Конфигурация Apache (проверено: .htaccess в /sextant/
+# обрабатывается, значит AllowOverride для каталога сайта включён).
+#
+# nginx стоит перед Apache, поэтому переменные HTTPS и SERVER_PORT здесь не
+# отражают схему запроса: схему сообщает X-Forwarded-Proto. Условие ниже
+# срабатывает только тогда, когда прокси прямо сообщил «http» — так редирект не
+# может зациклиться на уже защищённом соединении. Если хостинг не отдаёт этот
+# заголовок, правило не сработает: сначала проверьте заголовки на сервере.
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # --- 1. Старые адреса кейсов: /case.html?work=<id> → /cases/<slug>/ ---
+  # Карта точная: только известные работы. Неизвестный work не перенаправляем
+  # «куда-нибудь» — он попадёт на страницу 404, потому что файла нет.
+  RewriteCond %{QUERY_STRING} (^|&)work=sextant(&|$) [NC]
+  RewriteRule ^case\.html$ /cases/sextant/? [R=301,L]
+
+  RewriteCond %{QUERY_STRING} (^|&)work=forma(&|$) [NC]
+  RewriteRule ^case\.html$ /cases/forma/? [R=301,L]
+
+  RewriteCond %{QUERY_STRING} (^|&)work=kitstroy(&|$) [NC]
+  RewriteRule ^case\.html$ /cases/kitstroy/? [R=301,L]
+
+  RewriteCond %{QUERY_STRING} (^|&)work=technoremont(&|$) [NC]
+  RewriteRule ^case\.html$ /cases/technoremont/? [R=301,L]
+
+  RewriteCond %{QUERY_STRING} (^|&)work=sincere(&|$) [NC]
+  RewriteRule ^case\.html$ /cases/sincere/? [R=301,L]
+
+  RewriteCond %{QUERY_STRING} (^|&)work=sertexity(&|$) [NC]
+  RewriteRule ^case\.html$ /cases/sertexity/? [R=301,L]
+
+  # Старый общий адрес без параметра — в каталог кейсов.
+  RewriteRule ^case\.html$ /cases/ [R=301,L]
+
+  # --- 2. index.html приводим к адресу каталога ---
+  # Правило не заходит в /sextant/ и /remont/: их страницы лежат в своих папках,
+  # а RewriteRule без ведущего слэша работает только в текущем каталоге.
+  RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+  RewriteRule ^index\.html$ / [R=301,L]
+
+  # --- 3. Путь без завершающего слэша у папки: /cases/sextant → /cases/sextant/ ---
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteRule ^(.*)$ /$1/ [R=301,L]
+</IfModule>
+
+# --- 4. Страница ошибки ---
+ErrorDocument 404 /404.html
+
+# --- 5. Кеширование ---
+<IfModule mod_headers.c>
+  # HTML не кешируем надолго: после выкладки должна приезжать новая разметка,
+  # а не ссылки на уже удалённые файлы сборки.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # У файлов сборки в имени хеш содержимого — их можно кешировать надолго.
+  <FilesMatch "\.(js|css|woff2|webp|png|svg)$">
+    Header set Cache-Control "public, max-age=3888000"
+  </FilesMatch>
+</IfModule>
+
+# --- 6. Зеркала ---
+# Редирект с http и с www включаем после проверки заголовков на сервере:
+# у REG.RU схему сообщает X-Forwarded-Proto, а без этого правила можно получить
+# цикл. Точные строки и порядок проверки — в отчёте, раздел «Серверная часть».

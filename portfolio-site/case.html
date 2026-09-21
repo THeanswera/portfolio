@@ -3,23 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Кейс — Александра Мельникова</title>
+    <title>Кейсы — Александра Мельникова</title>
     <meta
       name="description"
-      content="Разбор проекта: задача, решения, экраны и технические подробности. Верстка и разработка сайтов под ключ."
+      content="Разборы проектов: задача, решения, экраны и стек. Список работ портфолио."
     />
     <meta name="theme-color" content="#F4F1EA" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="canonical" href="https://rootlost.ru/case.html" />
-
-    <meta property="og:type" content="article" />
-    <meta property="og:locale" content="ru_RU" />
-    <meta property="og:title" content="Кейс — Александра Мельникова" />
-    <meta
-      property="og:description"
-      content="Задача, решения, экраны и технические подробности проекта."
-    />
-    <meta property="og:url" content="https://rootlost.ru/case.html" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href="https://rootlost.ru/cases/" />
+    <!--
+      Старый адрес кейсов. На хостинге .htaccess перенаправляет:
+        /case.html?work=<id>  →  /cases/<slug>/   (301)
+        /case.html            →  /cases/          (301)
+      Эта страница нужна как запасной путь — если файл откроют напрямую или
+      из локальной сборки. В поиске ей делать нечего: содержимое то же самое.
+    -->
+    <meta name="robots" content="noindex, follow" />
   </head>
   <body>
     <div id="case-root"></div>

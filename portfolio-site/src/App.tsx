@@ -1,33 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Approach } from './components/Approach';
-import { FloatingActions, ScrollProgress } from './components/Chrome';
 import { Contact } from './components/Contact';
-import { CookieBanner, COOKIE_KEY } from './components/CookieBanner';
-import type { CookieChoice } from './components/CookieBanner';
-import { Footer } from './components/Footer';
-import { Header } from './components/Header';
+import { Formats } from './components/Formats';
 import { Hero } from './components/Hero';
 import { Process } from './components/Process';
 import { Services } from './components/Services';
+import { SiteShell } from './components/SiteShell';
+import type { CookieChoice } from './components/CookieBanner';
+import { COOKIE_KEY } from './components/CookieBanner';
 import { Works } from './components/Works';
 import { useCounters } from './lib/counters';
-import { initReveal } from './lib/reveal';
 
-function readCookieChoice(): CookieChoice | null {
-  try {
-    const value = window.localStorage.getItem(COOKIE_KEY);
-    return value === 'all' || value === 'necessary' ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-initReveal();
-
-export default function App() {
-  const [cookieOpen, setCookieOpen] = useState(() => readCookieChoice() === null);
+/**
+ * Главная страница. Отдельным компонентом, потому что её рендерят двое:
+ * браузер (src/main.tsx) и сборка статических страниц (scripts/prerender).
+ */
+export function HomePage() {
+  // В статической сборке localStorage недоступен, поэтому уведомление
+  // показывается после монтирования: иначе разметка сервера и браузера
+  // разошлись бы и React перерисовал бы весь документ.
+  const [cookieOpen, setCookieOpen] = useState(false);
 
   useCounters();
+
+  useEffect(() => {
+    try {
+      const value = window.localStorage.getItem(COOKIE_KEY);
+      if (value !== 'all' && value !== 'necessary') setCookieOpen(true);
+    } catch {
+      setCookieOpen(true);
+    }
+  }, []);
 
   const decideCookie = (choice: CookieChoice) => {
     try {
@@ -39,30 +42,16 @@ export default function App() {
   };
 
   return (
-    <>
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:bg-ink focus:px-4 focus:py-2 focus:font-mono focus:text-[12px] focus:tracking-widest focus:text-paper focus:uppercase"
-      >
-        Перейти к содержанию
-      </a>
-
-      <div className="grain" aria-hidden="true" />
-      <ScrollProgress />
-      <Header />
-
-      <main id="main">
-        <Hero />
-        <Services />
-        <Works />
-        <Process />
-        <Approach />
-        <Contact />
-      </main>
-
-      <Footer />
-      <FloatingActions lifted={cookieOpen} />
-      {cookieOpen && <CookieBanner onDecide={decideCookie} />}
-    </>
+    <SiteShell cookieOpen={cookieOpen} onCookieDecide={decideCookie}>
+      <Hero />
+      <Services />
+      <Works />
+      <Formats />
+      <Process />
+      <Approach />
+      <Contact />
+    </SiteShell>
   );
 }
+
+export default HomePage;

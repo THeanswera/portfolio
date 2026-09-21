@@ -26,15 +26,16 @@ const MIME = {
 };
 
 const PAGES = [
-  { id: 'home', url: '/index.html', widths: [1440, 768, 360] },
-  { id: 'case-forma', url: '/case.html?work=forma', widths: [1440, 768, 360] },
-  { id: 'case-kitstroy', url: '/case.html?work=kitstroy', widths: [1440] },
-  { id: 'case-technoremont', url: '/case.html?work=technoremont', widths: [1440] },
-  { id: 'case-sincere', url: '/case.html?work=sincere', widths: [1440] },
-  { id: 'case-sertexity', url: '/case.html?work=sertexity', widths: [1440] },
-  { id: 'case-sextant', url: '/case.html?work=sextant', widths: [1440, 768] },
+  { id: 'home', url: '/', widths: [1440, 768, 360] },
+  { id: 'catalog', url: '/cases/', widths: [1440, 360] },
+  { id: 'case-sextant', url: '/cases/sextant/', widths: [1440, 768, 360] },
+  { id: 'case-forma', url: '/cases/forma/', widths: [1440, 360] },
+  { id: 'case-kitstroy', url: '/cases/kitstroy/', widths: [1440] },
+  { id: 'case-technoremont', url: '/cases/technoremont/', widths: [1440] },
+  { id: 'case-sincere', url: '/cases/sincere/', widths: [1440] },
+  { id: 'case-sertexity', url: '/cases/sertexity/', widths: [1440] },
   { id: 'privacy', url: '/privacy.html', widths: [1440] },
-  { id: 'case-missing', url: '/case.html?work=unknown', widths: [1440] },
+  { id: 'not-found', url: '/404.html', widths: [1440] },
 ];
 
 /** Чужой сайт проверяется тем же разбором: node scripts/audit-visual.mjs --base <адрес> --paths /,/projects/ */
@@ -65,14 +66,23 @@ const MIN_GAP = minGapIndex === -1 ? 280 : Number(args[minGapIndex + 1]);
 async function startStaticServer() {
   const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? '/', `http://127.0.0.1:${PORT}`);
-    const filePath = path.join(DIST, decodeURIComponent(url.pathname));
+    let filePath = path.join(DIST, decodeURIComponent(url.pathname));
+    // Каталог отдаёт свой index.html — так же, как это делает хостинг.
+    if (url.pathname.endsWith('/')) filePath = path.join(filePath, 'index.html');
     try {
       const data = await readFile(filePath);
       res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath)] ?? 'application/octet-stream' });
       res.end(data);
     } catch {
-      res.writeHead(404);
-      res.end('not found');
+      // Неизвестный адрес: 404 с собственной страницей ошибки.
+      try {
+        const data = await readFile(path.join(DIST, '404.html'));
+        res.writeHead(404, { 'Content-Type': MIME['.html'] });
+        res.end(data);
+      } catch {
+        res.writeHead(404);
+        res.end('not found');
+      }
     }
   });
   await new Promise((resolve) => server.listen(PORT, '127.0.0.1', resolve));

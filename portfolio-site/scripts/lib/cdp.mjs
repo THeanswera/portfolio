@@ -93,10 +93,18 @@ export function connect(wsUrl) {
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(wsUrl);
     const pending = new Map();
+    const listeners = new Map();
     let nextId = 1;
 
     socket.addEventListener('message', (event) => {
       const message = JSON.parse(event.data);
+
+      if (message.method) {
+        const handler = listeners.get(message.method);
+        if (handler) handler(message.params ?? {});
+        return;
+      }
+
       const handler = pending.get(message.id);
       if (!handler) return;
       pending.delete(message.id);
@@ -112,6 +120,10 @@ export function connect(wsUrl) {
             pending.set(id, { resolve: res, reject: rej });
             socket.send(JSON.stringify({ id, method, params }));
           });
+        },
+        /** Подписка на события браузера: ошибки страницы и сообщения консоли. */
+        on(method, handler) {
+          listeners.set(method, handler);
         },
         close: () => socket.close(),
       }),
@@ -147,13 +159,22 @@ export async function goto(client, url, { settle = 2200 } = {}) {
   await sleep(settle);
 }
 
-export async function evaluate(client, expression) {
+export async function evaluate(client, expression, { awaitPromise = true } = {}) {
   const { result, exceptionDetails } = await client.send('Runtime.evaluate', {
     expression,
     returnByValue: true,
-    awaitPromise: true,
+    awaitPromise,
   });
-  if (exceptionDetails) throw new Error(exceptionDetails.text ?? 'Ошибка выполнения в браузере');
+  if (exceptionDetails) {
+    // Ошибку в самой проверяемой странице показываем целиком: иначе проверка
+    // «молча» получает undefined и сообщает о несуществующем дефекте.
+    const reason =
+      exceptionDetails.exception?.description ??
+      exceptionDetails.exception?.value ??
+      exceptionDetails.text ??
+      'Ошибка выполнения в браузере';
+    throw new Error(String(reason).split('\n').slice(0, 3).join(' | '));
+  }
   return result.value;
 }
 

@@ -33,7 +33,7 @@ export function Process() {
           <div className="lg:sticky lg:top-28 lg:self-start">
             <Reveal>
               <SectionHead
-                index="03 / 05"
+                index="04 / 06"
                 label="Процесс"
                 title="Как проходит работа"
                 text="Пять шагов без технического тумана: вы всегда знаете, что происходит сейчас и что будет дальше."

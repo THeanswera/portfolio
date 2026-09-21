@@ -1,4 +1,5 @@
 import { site } from '../data/site';
+import { homeUrl } from '../lib/links';
 
 /** Монограмма с типографскими метками-уголками. */
 export function LogoMark({ className = 'size-10' }: { className?: string }) {
@@ -18,7 +19,8 @@ export function LogoMark({ className = 'size-10' }: { className?: string }) {
 export function Logo({ withSubtitle = true }: { withSubtitle?: boolean }) {
   return (
     <a
-      href="#top"
+      // Логотип всегда ведёт на главную: на странице кейса якоря #top нет.
+      href={homeUrl()}
       className="flex min-h-11 items-center gap-3"
       aria-label={`${site.name} — на главную`}
     >

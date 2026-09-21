@@ -1,19 +1,34 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
 import { site } from '../data/site';
+import { homeUrl } from '../lib/links';
 import { Logo } from './Logo';
 
-const links = [
-  { href: '#services', label: 'Услуги', index: '01' },
-  { href: '#works', label: 'Работы', index: '02' },
-  { href: '#process', label: 'Процесс', index: '03' },
-  { href: '#approach', label: 'Подход', index: '04' },
-  { href: '#contact', label: 'Контакты', index: '05' },
+const sections = [
+  { hash: 'services', label: 'Услуги', index: '01' },
+  { hash: 'works', label: 'Работы', index: '02' },
+  { hash: 'formats', label: 'Форматы', index: '03' },
+  { hash: 'process', label: 'Процесс', index: '04' },
+  { hash: 'approach', label: 'Подход', index: '05' },
+  { hash: 'contact', label: 'Контакты', index: '06' },
 ];
 
-export function Header() {
+/**
+ * Меню ведёт к разделам главной. На главной это якоря текущего документа, на
+ * остальных страницах — адреса главной целиком: иначе пункт менял бы хеш и
+ * ничего не находил, потому что таких секций на странице кейса нет.
+ */
+function menuLinks(onHome: boolean) {
+  return sections.map((section) => ({
+    ...section,
+    href: onHome ? `#${section.hash}` : homeUrl(section.hash),
+  }));
+}
+
+export function Header({ onHome = true }: { onHome?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const links = menuLinks(onHome);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -46,7 +61,7 @@ export function Header() {
         <nav aria-label="Основная навигация" className="hidden lg:block">
           <ul className="flex items-center gap-7">
             {links.map((link) => (
-              <li key={link.href}>
+              <li key={link.hash}>
                 <a
                   href={link.href}
                   className="link-draw font-mono text-[11.5px] tracking-[0.12em] text-ink uppercase"
@@ -91,7 +106,7 @@ export function Header() {
         <nav aria-label="Мобильная навигация" className="container-x py-6">
           <ul className="flex flex-col">
             {links.map((link) => (
-              <li key={link.href} className="border-b border-line last:border-0">
+              <li key={link.hash} className="border-b border-line last:border-0">
                 <a
                   href={link.href}
                   onClick={() => setOpen(false)}

@@ -108,6 +108,19 @@ export type Work = {
   shot?: string;
   year: string;
 
+  /** Часть адреса кейса: /cases/<slug>/. Не зависит от заголовка работы. */
+  slug: string;
+  /** Продолжение заголовка страницы: «СЕКСТАНТ — <…>». */
+  titleSuffix: string;
+  /** Дата существенного обновления кейса — идёт в lastmod карты сайта. */
+  updated: string;
+  /** Проект публикуется отдельной страницей кейса. */
+  published: boolean;
+  /** Компания, цены и контакты вымышлены: демонстрационный сайт, услуги не оказываются. */
+  demo?: boolean;
+  /** Ссылка на живой сайт сейчас не работает — обещать открытие нельзя. */
+  urlDown?: boolean;
+
   /** --- страница кейса --- */
   lead?: string;
   role?: string;
@@ -152,6 +165,11 @@ export const works: Work[] = [
     shot: '/shots/sextant.webp',
     scrollShot: '/shots/sextant-full.webp',
     year: '2026',
+    slug: 'sextant',
+    titleSuffix: 'сайт часовой мануфактуры с 3D-механикой',
+    updated: '2026-09-21',
+    published: true,
+    demo: true,
     role: 'Структура, дизайн, 3D-модель, промпты для изображений, вёрстка и серверная часть — полностью',
     timeline: 'Две недели: генератор страниц, 3D-модель на three.js, промпты и скрипт установки изображений',
     facts: [
@@ -239,6 +257,11 @@ export const works: Work[] = [
     urlLabel: 'masterskaya-forma.ru',
     shot: '/shots/forma.webp',
     scrollShot: '/shots/forma-full.webp',
+    slug: 'forma',
+    titleSuffix: 'сайт мастерской мебели с конфигуратором',
+    updated: '2026-09-21',
+    published: true,
+    demo: true,
     role: 'Структура, дизайн, вёрстка, фронтенд и серверная часть — полностью',
     timeline: 'Две недели от структуры до публикации',
     facts: [
@@ -321,6 +344,10 @@ export const works: Work[] = [
     shot: '/shots/kitstroy.webp',
     scrollShot: '/shots/kitstroy-full.webp',
     year: '2026',
+    slug: 'kitstroy',
+    titleSuffix: 'сайт инженерной компании на WordPress',
+    updated: '2026-09-21',
+    published: true,
     role: 'Редизайн, дизайн-система, тема WordPress, калькулятор и формы — полностью',
     timeline: 'Четыре недели: аудит, дизайн-система, механики, контент',
     facts: [
@@ -394,6 +421,11 @@ export const works: Work[] = [
     shot: '/shots/technoremont.webp',
     scrollShot: '/shots/technoremont-full.webp',
     year: '2026',
+    slug: 'technoremont',
+    titleSuffix: 'многостраничный сайт сервисного центра',
+    updated: '2026-09-21',
+    published: true,
+    demo: true,
     role: 'Структура, дизайн, вёрстка и скрипты — полностью',
     timeline: 'Десять дней',
     facts: [
@@ -445,6 +477,10 @@ export const works: Work[] = [
     shot: '/shots/sincere.webp',
     scrollShot: '/shots/sincere-full.webp',
     year: '2025',
+    slug: 'sincere',
+    titleSuffix: 'сайт-портфолио фотографа на WordPress',
+    updated: '2026-09-21',
+    published: true,
     role: 'Сборка на WordPress, формы, аналитика, SEO-настройка',
     timeline: 'Восемь дней',
     facts: [
@@ -502,6 +538,14 @@ export const works: Work[] = [
     shot: '/shots/sertexity.webp',
     scrollShot: '/shots/sertexity-full.webp',
     year: '2026',
+    slug: 'sertexity',
+    titleSuffix: 'промо-сайт платформы арбитража',
+    updated: '2026-09-21',
+    published: true,
+    demo: true,
+    // Домен masterskaya-forma.online не отвечает: зона отдаёт NXDOMAIN,
+    // в реестре .online записи о домене нет. Обещать открытие сайта нельзя.
+    urlDown: true,
     role: 'Структура, дизайн, вёрстка, Canvas-механики и серверная часть — полностью',
     timeline: 'Восемь дней от макета до публикации',
     facts: [
@@ -653,7 +697,6 @@ export const stack = [
   'Open Graph',
   'JSON-LD',
   'Chrome DevTools',
-  'Яндекс.Метрика',
 ];
 
 /** Лента под первым экраном. */
@@ -671,8 +714,20 @@ export type SpecRow =
   | { value: number; suffix: string; label: string; note: string }
   | { value: null; text: string; label: string; note: string };
 
+/** Опубликованные кейсы: именно они дают число в счётчике портфолио. */
+export const publishedWorks = works.filter((work) => work.published);
+
+/**
+ * Число на первом экране считается из данных, а не вписано руками: раньше там
+ * стояло «5 живых сайтов» при шести работах, и подпись не объясняла разницу.
+ */
 export const spec: SpecRow[] = [
-  { value: 5, suffix: '', label: 'проектов в работе', note: 'живые сайты' },
+  {
+    value: publishedWorks.length,
+    suffix: '',
+    label: 'проектов в портфолио',
+    note: 'с разбором и экранами',
+  },
   { value: 3, suffix: '', label: 'направления', note: 'лендинги · корпоративные · wordpress' },
   { value: null, text: 'под ключ', label: 'формат работы', note: 'по макету, ТЗ или идее' },
 ];

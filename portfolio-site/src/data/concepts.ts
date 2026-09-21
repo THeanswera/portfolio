@@ -1,6 +1,12 @@
 import type { Work } from './site';
 
-export type ConceptWork = Work & { mock: 'dashboard' | 'uikit' | 'quiz' };
+/**
+ * Концепт — это не опубликованный кейс: у него нет адреса, даты обновления и
+ * страницы, поэтому обязательные поля Work здесь не нужны.
+ */
+export type ConceptWork = Omit<Work, 'slug' | 'titleSuffix' | 'updated' | 'published'> & {
+  mock: 'dashboard' | 'uikit' | 'quiz';
+};
 
 /**
  * Демонстрационные интерфейсные кейсы (дашборд, дизайн-система, квиз).

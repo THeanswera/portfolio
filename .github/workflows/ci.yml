@@ -29,8 +29,14 @@ jobs:
       - name: Типы и сборка
         run: npm run build
 
+      - name: Метаданные, карта сайта и ссылки в собранном сайте
+        run: node scripts/check-seo.mjs dist
+
       - name: Проверка в браузере на 360, 768 и 1440
         run: node scripts/check-responsive.mjs
+
+      - name: Доступность, клавиатура и ширины 320–1440
+        run: node scripts/audit-a11y.mjs
 
       - name: Визуальная проверка страниц
         run: node scripts/audit-visual.mjs
@@ -50,6 +56,7 @@ jobs:
             .tmp-check/*.png
             .tmp-audit/audit.json
             .tmp-audit/*.png
+            .tmp-a11y/a11y.json
           if-no-files-found: ignore
           retention-days: 7
 

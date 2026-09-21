@@ -1,4 +1,5 @@
 import { legal, site } from '../data/site';
+import { homeUrl } from '../lib/links';
 import { Logo } from '../components/Logo';
 
 const sections: { title: string; body: string[] }[] = [
@@ -45,7 +46,8 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: '6. Передача третьим лицам',
     body: [
-      'Персональные данные не продаются, не публикуются и не передаются третьим лицам, кроме случаев, прямо предусмотренных законом.',
+      'Сайт сам ничего никуда не передаёт: у него нет серверной формы и нет счётчиков. Но если посетитель решает написать исполнителю в Telegram или по электронной почте, сообщение идёт через эти сервисы — они обрабатывают данные по своим правилам, с которыми можно ознакомиться на их сайтах.',
+      'Кроме этого случая персональные данные не продаются, не публикуются и не передаются третьим лицам, кроме случаев, прямо предусмотренных законом.',
     ],
   },
   {
@@ -66,16 +68,24 @@ const sections: { title: string; body: string[] }[] = [
 export function PrivacyPage() {
   return (
     <div className="min-h-screen bg-paper">
+      {/* Пропуск к содержанию: без него клавиатурой приходится обходить шапку. */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:bg-ink focus:px-4 focus:py-2 focus:font-mono focus:text-[12px] focus:tracking-widest focus:text-paper focus:uppercase"
+      >
+        Перейти к содержанию
+      </a>
+
       <header className="border-b border-ink">
         <div className="container-x flex h-[68px] items-center justify-between gap-4 md:h-[80px]">
           <Logo withSubtitle={false} />
-          <a href="index.html" className="btn btn-ghost min-h-11 px-4">
+          <a href={homeUrl()} className="btn btn-ghost min-h-11 px-4">
             Вернуться на сайт
           </a>
         </div>
       </header>
 
-      <main className="container-x py-14 md:py-20">
+      <main id="main" className="container-x py-14 md:py-20">
         <div className="max-w-3xl">
           <p className="label-mono flex items-center gap-3">
             <span className="h-px w-8 bg-accent" aria-hidden="true" />

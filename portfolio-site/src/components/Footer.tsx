@@ -1,15 +1,22 @@
 import { Mail, Send } from 'lucide-react';
 import { legal, site } from '../data/site';
+import { homeUrl, privacyUrl } from '../lib/links';
 import { Logo } from './Logo';
 
 const nav = [
-  { href: '#services', label: 'Услуги' },
-  { href: '#works', label: 'Работы' },
-  { href: '#process', label: 'Процесс' },
-  { href: '#approach', label: 'Подход' },
-  { href: '#contact', label: 'Контакты' },
+  { hash: 'services', label: 'Услуги' },
+  { hash: 'works', label: 'Работы' },
+  { hash: 'formats', label: 'Форматы' },
+  { hash: 'process', label: 'Процесс' },
+  { hash: 'approach', label: 'Подход' },
+  { hash: 'contact', label: 'Контакты' },
 ];
 
+/**
+ * Подвал общий для всех страниц, поэтому разделы всегда адресуются от корня
+ * сайта. На странице кейса локальных секций #services и #works нет — раньше
+ * шесть ссылок подвала из шести вели в никуда.
+ */
 export function Footer() {
   return (
     <footer className="border-t-2 border-ink bg-paper">
@@ -27,9 +34,9 @@ export function Footer() {
             <p className="label-mono">Разделы</p>
             <ul className="mt-4 space-y-2">
               {nav.map((link) => (
-                <li key={link.href}>
+                <li key={link.hash}>
                   <a
-                    href={link.href}
+                    href={homeUrl(link.hash)}
                     className="link-draw inline-flex min-h-7 items-center text-[15px] text-ink-soft transition-colors hover:text-ink"
                   >
                     {link.label}
@@ -69,12 +76,9 @@ export function Footer() {
 
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
           <p className="label-mono">
-            © {new Date().getFullYear()} {site.name} · {legal.status} · ИНН {legal.inn}
+            © 2026 {site.name} · {legal.status} · ИНН {legal.inn}
           </p>
-          <a
-            href="privacy.html"
-            className="link-draw label-mono inline-flex min-h-7 items-center"
-          >
+          <a href={privacyUrl()} className="link-draw label-mono inline-flex min-h-7 items-center">
             Политика конфиденциальности
           </a>
           <p className="label-mono">Сверстано вручную: HTML, CSS и внимание к деталям</p>

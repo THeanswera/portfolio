@@ -313,22 +313,36 @@ try {
   report.checks.caseLinks = await evaluate(
     client,
     `(() => {
-      const rows = [...document.querySelectorAll('#works li a[href*="case.html"]')].map((a) => a.getAttribute('href'));
-      const featured = document.querySelector('#works article a[href*="case.html"]')?.getAttribute('href') ?? '';
-      const ids = rows.map((href) => new URLSearchParams(href.split('?')[1]).get('work'));
+      // Разбор кейса — единственная ссылка на /cases/<slug>/ в строке списка.
+      // Проверяем разбором строки, без регулярного выражения: внутри шаблона
+      // обратные слэши приходится экранировать дважды, и это уже ломало проверку.
+      const isCaseHref = (href) => {
+        if (!href || !href.startsWith('/cases/') || !href.endsWith('/')) return false;
+        const slug = href.slice(7, -1);
+        return slug.length > 0 && slug.indexOf('/') === -1;
+      };
+      const rows = [...document.querySelectorAll('#works li a')]
+        .map((a) => a.getAttribute('href'))
+        .filter(isCaseHref);
+      // В строке две ссылки на разбор (заголовок и стрелка) — берём одну на строку.
+      const uniqueRows = [...new Set(rows)];
+      const featured = [...document.querySelectorAll('#works article a')]
+        .map((a) => a.getAttribute('href'))
+        .find(isCaseHref) ?? '';
+      const ids = uniqueRows.map((href) => href.slice(7, -1));
       return {
-        rows: rows.length,
+        rows: uniqueRows.length,
         featured,
         ids,
         unique: new Set(ids).size === ids.length,
-        allAbsolute: [...rows, featured].every((href) => href.startsWith('./case.html?work=')),
+        allAbsolute: [...rows, featured].every(isCaseHref),
       };
     })()`,
   );
   await screenshot(client, path.join(SHOTS, '1440-works.png'));
 
   // Страница кейса: открывается, заполнена и не пустая
-  await goto(client, `http://127.0.0.1:${PORT}/case.html?work=forma`, { settle: 2000 });
+  await goto(client, `http://127.0.0.1:${PORT}/cases/forma/`, { settle: 2000 });
   report.checks.casePage = await evaluate(
     client,
     `(() => {
@@ -340,7 +354,7 @@ try {
         frames: document.querySelectorAll('.frame__shot').length,
         offers: document.querySelectorAll('.case-offers li').length,
         facts: document.querySelectorAll('.case-facts li').length,
-        hasForm: Boolean(document.querySelector('#case-contact')),
+        hasMessage: Boolean(document.querySelector('textarea[readonly]')),
         sections: ['разбор', 'что из этого можно заказать', 'экраны', 'задача'].filter((needle) => text.includes(needle)),
         emptyState: text.includes('такой работы в портфолио нет'),
         brokenImages: [...document.querySelectorAll('img')]
@@ -366,14 +380,14 @@ try {
   // Плавная прокрутка: сначала прокручиваем, ждём, и только потом считаем координаты строки
   await evaluate(
     client,
-    `document.querySelectorAll('#works li a[href*="case.html"]')[1].scrollIntoView({ block: 'center' })`,
+    `document.querySelectorAll('#works li a[href*="/cases/"]')[1].scrollIntoView({ block: 'center' })`,
   );
   await sleep(1100);
 
   const cursor = await evaluate(
     client,
     `(() => {
-      const row = document.querySelectorAll('#works li a[href*="case.html"]')[1];
+      const row = document.querySelectorAll('#works li a[href*="/cases/"]')[1];
       const rect = row.getBoundingClientRect();
       return { x: Math.round(rect.left + 60), y: Math.round(rect.top + rect.height / 2) };
     })()`,
@@ -445,7 +459,13 @@ try {
           h1: document.querySelector('h1')?.textContent?.trim() ?? '',
           sections: document.querySelectorAll('main section').length,
           hasHorizontalScroll: document.documentElement.scrollWidth > vw + 1,
-          policyLinks: document.querySelectorAll('a[href="index.html"]').length,
+          // На самой странице политики ссылка на неё не нужна: проверяем, что
+          // она есть в подвале главной (ниже) и что страница открывается.
+          policyLinks: document.querySelectorAll('a[href="/privacy.html"]').length,
+          policySelf: document.querySelectorAll('a[href="/"]').length,
+          skipLink: [...document.querySelectorAll('a')].some((a) =>
+            (a.textContent || '').includes('Перейти к содержанию'),
+          ),
           errors: window.__errors ?? [],
         };
       })()`,

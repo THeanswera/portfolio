@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { works } from '../data/site';
 import type { Work } from '../data/site';
+import { caseUrl } from '../lib/links';
+import { plural } from '../lib/plural';
 import { SectionHead } from './Services';
 import { Reveal } from '../lib/reveal';
 import { ScrollFrame } from './ScrollFrame';
@@ -9,16 +11,29 @@ import { ScrollFrame } from './ScrollFrame';
 const PREVIEW_WIDTH = 360;
 const PREVIEW_MIN_Y = 92; // ниже фиксированной шапки
 
-const caseHref = (work: Work) => `./case.html?work=${work.id}`;
+const caseHref = (work: Work) => caseUrl(work.id);
 
-/** Русское склонение: 1 работа, 2 работы, 5 работ. */
-function plural(count: number, one: string, few: string, many: string) {
-  const mod100 = count % 100;
-  const mod10 = count % 10;
-  if (mod100 >= 11 && mod100 <= 14) return many;
-  if (mod10 === 1) return one;
-  if (mod10 >= 2 && mod10 <= 4) return few;
-  return many;
+/** Метка состояния живой ссылки: обещать открытие недоступного демо нельзя. */
+function LinkStatus({ work }: { work: Work }) {
+  if (!work.url || work.urlDown) {
+    return (
+      <span className="label-mono inline-flex items-center border border-line px-2 py-1 text-ink-soft">
+        демо недоступно — смотрите разбор
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={work.url}
+      target="_blank"
+      rel="noreferrer"
+      className="link-draw label-mono inline-flex min-h-7 items-center gap-1.5 text-ink-soft hover:text-ink"
+    >
+      {work.urlLabel ?? 'открыть сайт'}
+      <ArrowUpRight className="size-3.5" aria-hidden="true" />
+    </a>
+  );
 }
 
 /** Устройства с настоящим курсором — только там включаем превью, следующее за мышью. */
@@ -58,16 +73,12 @@ function Featured({ work }: { work: Work }) {
           </ul>
         )}
 
-        <div className="mt-9 flex flex-wrap gap-3">
+        <div className="mt-9 flex flex-wrap items-center gap-3">
           <a href={caseHref(work)} className="btn btn-primary">
             Разобрать кейс
             <ArrowUpRight className="size-4" aria-hidden="true" />
           </a>
-          {work.url && (
-            <a href={work.url} target="_blank" rel="noreferrer" className="btn btn-ghost">
-              Открыть сайт
-            </a>
-          )}
+          <LinkStatus work={work} />
         </div>
       </div>
 
@@ -133,10 +144,10 @@ export function Works() {
       <div className="container-x">
         <Reveal>
           <SectionHead
-            index="02 / 05"
+            index="02 / 06"
             label="Работы"
             title="Проекты, которые можно открыть и потрогать"
-            text="По каждой работе есть разбор: что решали, как сделано и что из этого можно повторить у вас. Сайты открываются по ссылке — это не картинки, а работающие проекты."
+            text="По каждой работе есть разбор: задача, что сделано, экраны и стек. Часть проектов — демонстрационные сайты вымышленных компаний; где живая ссылка не открывается, это указано прямо в карточке."
           />
         </Reveal>
 
@@ -151,7 +162,7 @@ export function Works() {
         <Reveal>
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
             <p className="label-mono">
-              {rest.length} {plural(rest.length, 'работа', 'работы', 'работ')} · нажмите, чтобы открыть разбор
+              Ещё {rest.length} {plural(rest.length, 'работа', 'работы', 'работ')} · нажмите, чтобы открыть разбор
             </p>
             {canHover && (
               <span className="label-mono hidden lg:block">наведите на строку — сайт прокрутится</span>
@@ -170,28 +181,50 @@ export function Works() {
               }}
               onMouseLeave={() => setHovered(null)}
             >
-              <a
-                href={caseHref(work)}
-                className="group grid w-full grid-cols-[46px_1fr] items-baseline gap-x-4 gap-y-3 border-b border-line py-6 text-left md:grid-cols-[64px_1.4fr_1fr_auto_auto] md:items-center md:gap-6"
-              >
+              <div className="grid w-full grid-cols-[46px_1fr] items-baseline gap-x-4 gap-y-3 border-b border-line py-6 md:grid-cols-[64px_1.4fr_1fr_auto_auto] md:items-center md:gap-6">
                 <span className="index-num">{String(index + 1).padStart(2, '0')}</span>
 
-                <span className="font-display text-[26px] leading-tight font-bold text-ink transition-colors duration-300 group-hover:text-accent md:text-[34px]">
-                  {work.title}
+                {/*
+                  Ссылка на разбор занимает заголовок и метку, а живая ссылка на
+                  сайт стоит отдельной колонкой. Вложенные <a> недопустимы, и
+                  браузер разрывал бы такую разметку при разборе HTML.
+                */}
+                <a
+                  href={caseHref(work)}
+                  className="group col-start-2 flex flex-wrap items-baseline gap-x-6 gap-y-1 md:col-span-2 md:col-start-auto md:grid md:grid-cols-[1.4fr_1fr] md:gap-6"
+                >
+                  <span className="font-display text-[26px] leading-tight font-bold text-ink transition-colors duration-300 group-hover:text-accent md:text-[34px]">
+                    {work.title}
+                  </span>
+                  <span className="label-mono">{work.tag}</span>
+                </a>
+
+                <span className="col-start-2 md:col-start-auto">
+                  <LinkStatus work={work} />
                 </span>
 
-                <span className="label-mono col-start-2 md:col-start-auto">{work.tag}</span>
-
-                <span className="label-mono col-start-2 md:col-start-auto md:text-right">{work.year}</span>
-
-                <ArrowUpRight
-                  className="col-start-2 size-5 text-ink-soft transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-accent md:col-start-auto"
-                  aria-hidden="true"
-                />
-              </a>
+                <a
+                  href={caseHref(work)}
+                  aria-label={`Разбор кейса «${work.title}»`}
+                  className="group col-start-2 inline-flex items-center gap-3 md:col-start-auto"
+                >
+                  <span className="label-mono">{work.year}</span>
+                  <ArrowUpRight
+                    className="size-5 text-ink-soft transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-accent"
+                    aria-hidden="true"
+                  />
+                </a>
+              </div>
             </li>
           ))}
         </ul>
+
+        <p className="mt-6">
+          <a href="./cases/" className="btn btn-ghost">
+            Все кейсы отдельной страницей
+            <ArrowUpRight className="size-4" aria-hidden="true" />
+          </a>
+        </p>
       </div>
 
       {/* Превью, следующее за курсором */}

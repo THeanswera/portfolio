@@ -16,14 +16,12 @@
     <meta property="og:type" content="article" />
     <meta property="og:locale" content="ru_RU" />
     <meta property="og:title" content="Политика конфиденциальности" />
-    <meta
-      property="og:description"
-      content="Какие данные обрабатывает сайт-портфолио и как отозвать согласие."
-    />
+    <meta property="og:description" content="Какие данные обрабатывает сайт-портфолио и как отозвать согласие." />
     <meta property="og:url" content="https://rootlost.ru/privacy.html" />
   </head>
   <body>
-    <div id="privacy-root"></div>
-    <script type="module" src="/src/privacy.tsx"></script>
+    <!-- Разметку этой страницы также снимает сборка: текст политики виден без JavaScript. -->
+    <div id="prerender-root"></div>
+    <script type="module" src="/src/entries/render.tsx"></script>
   </body>
 </html>

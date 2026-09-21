@@ -9,7 +9,7 @@ export function Approach() {
       <div className="container-x">
         <Reveal>
           <SectionHead
-            index="04 / 05"
+            index="05 / 06"
             label="Подход"
             title="Почему со мной спокойно"
             text="Шесть причин, по которым заказчики возвращаются с новыми задачами вместо поиска нового исполнителя."

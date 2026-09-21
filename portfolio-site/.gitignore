@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Картинки превью ссылок собираются из снимков экранов: node scripts/build-og-images.mjs
+public/og/
 .tmp-shots/
 .tmp-check/
 .tmp-check-profile/
@@ -14,4 +16,8 @@ dist/
 .backup/
 *.log
 .DS_Store
+# Служебные файлы проверок: .tmp-check, .tmp-audit, .tmp-a11y, .tmp-perf,
+# .tmp-prerender и профили браузера. Правило точечное, чтобы случайно не
+# спрятать настоящий файл вроде `tmp-config.json`.
 .tmp-*
+tmp/

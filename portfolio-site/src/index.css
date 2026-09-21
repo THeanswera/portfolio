@@ -297,8 +297,15 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
 }
 
-/* Появление при скролле */
-[data-reveal] {
+/*
+ * Появление при скролле.
+ *
+ * Скрываем блоки только тогда, когда JavaScript работает: класс js ставит
+ * initReveal() до первой отрисовки. В исходном HTML (и с выключённым JS, и для
+ * робота, который не выполняет скрипты) текст виден сразу — раньше он был
+ * скрыт правилом opacity: 0 и появлялся только после исполнения кода.
+ */
+.js [data-reveal] {
   opacity: 0;
   transform: translateY(22px);
   transition:
@@ -307,13 +314,13 @@
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-[data-reveal].is-visible {
+.js [data-reveal].is-visible {
   opacity: 1;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
+  .js [data-reveal] {
     opacity: 1;
     transform: none;
   }
