@@ -452,15 +452,21 @@
 }
 
 .spec dt {
-  flex: none;
+  /* Подпись сжимается и переносится: с flex: none она выталкивала значение
+     за колонку на 320px — «+7 дней» и текст про замер уезжали за край. */
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 13.5px;
   color: var(--text-dim);
 }
 
 .spec dd {
+  flex: 0 1 auto;
+  min-width: 0;
   max-width: 62%;
   font-size: 14px;
   text-align: right;
+  overflow-wrap: break-word;
 }
 
 .spec--wide div {

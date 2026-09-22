@@ -41,6 +41,9 @@ jobs:
       - name: Визуальная проверка страниц
         run: node scripts/audit-visual.mjs
 
+      - name: Наложение текста и выход за сетку
+        run: node scripts/check-layout.mjs --site portfolio
+
       - name: Кодировка и ссылки
         run: |
           node scripts/check-mojibake.mjs dist html,css,js
@@ -79,6 +82,18 @@ jobs:
 
       - name: Проверка в браузере на 360, 768 и 1440
         run: node scripts/check.mjs
+
+      - name: Зависимости для проверки пометок о демо
+        working-directory: portfolio-site
+        run: npm ci
+
+      - name: Пометки о демонстрационном проекте на демо-сайтах
+        working-directory: portfolio-site
+        run: node scripts/check-demo-notices.mjs
+
+      - name: Наложение текста и выход за сетку на демо-страницах
+        working-directory: portfolio-site
+        run: node scripts/check-layout.mjs --site remont,forma
 
   kitstroy:
     name: Тема «КИТ-Строй.Москва»

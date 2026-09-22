@@ -14,6 +14,7 @@ on:
           - both
           - portfolio
           - masterskaya
+          - remont
           - kitstroy
           - sertexity
           - sextant
@@ -73,14 +74,26 @@ jobs:
         run: node build.mjs
 
       - name: Выгрузка портфолио
-        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
+        if: inputs.target != 'masterskaya' && inputs.target != 'kitstroy' && inputs.target != 'sertexity' && inputs.target != 'remont'
         working-directory: portfolio-site
         env:
           FTP_DIR: /www/rootlost.ru
         run: node scripts/deploy.mjs
 
+      # Демо «ТехРемонт» лежит в подпапке портфолио: без FTP_SRC выгрузка
+      # ушла бы в /remont из папки dist, то есть чужими файлами.
+      - name: Выгрузка демо «ТехРемонт»
+        if: inputs.target == 'remont'
+        working-directory: portfolio-site
+        env:
+          FTP_SRC: demos/remont
+          # README.md — инструкция по правке демо, на сервере она не нужна.
+          FTP_EXCLUDE: README.md
+          FTP_DIR: /www/rootlost.ru/remont
+        run: node scripts/deploy.mjs
+
       - name: Выгрузка демо-сайта
-        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy' && inputs.target != 'sertexity'
+        if: inputs.target != 'portfolio' && inputs.target != 'kitstroy' && inputs.target != 'sertexity' && inputs.target != 'remont'
         env:
           FTP_SRC: masterskaya-forma/dist
           FTP_DIR: /www/masterskaya-forma.ru

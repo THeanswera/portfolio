@@ -9,6 +9,7 @@
     "build": "tsc --noEmit && node scripts/build-og-images.mjs && node scripts/build-assets.mjs && node scripts/prerender.mjs && node scripts/generate-meta.mjs && node scripts/clean-dist.mjs",
     "preview": "vite preview",
     "check:responsive": "node scripts/check-responsive.mjs",
+    "check:layout": "node scripts/check-layout.mjs",
     "check:visual": "node scripts/audit-visual.mjs",
     "check:images": "node scripts/case-shots.mjs",
     "check:mojibake": "node scripts/check-mojibake.mjs src html,css,ts,tsx,mjs",

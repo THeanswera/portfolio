@@ -3,6 +3,10 @@
 // Запуск:
 //   $env:FTP_USER='...'; $env:FTP_PASS='...'; $env:FTP_DIR='/www/домен'
 //   node scripts/deploy.mjs [--dry-run]
+//
+// FTP_SRC — что выгружаем (по умолчанию dist).
+// FTP_EXCLUDE — имена файлов и папок, которые на сервер не нужны, через запятую:
+// у демо «ТехРемонт» это README.md с инструкцией по правке.
 import { spawnSync } from 'node:child_process';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -29,13 +33,21 @@ if (!dir) {
 
 const IGNORED = /(^|\/)(node_modules|\.git|\.tmp[A-Za-z-]*)(\/|$)|\.(bak|log|tmp|psd|fig|zip)$/i;
 
+/** Что не выгружаем сверх IGNORED: FTP_EXCLUDE=README.md,docs */
+const EXCLUDED = (process.env.FTP_EXCLUDE ?? '')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+const skip = (rel) => IGNORED.test(rel) || EXCLUDED.some((name) => rel === name || rel.startsWith(`${name}/`));
+
 async function walk(root, prefix = '') {
   const entries = await readdir(root, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const abs = path.join(root, entry.name);
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (IGNORED.test(rel)) continue;
+    if (skip(rel)) continue;
     if (entry.isDirectory()) files.push(...(await walk(abs, rel)));
     else files.push({ abs, rel, size: (await stat(abs)).size });
   }

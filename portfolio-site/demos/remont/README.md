@@ -18,17 +18,21 @@ node scripts/ftp-pull.mjs /www/rootlost.ru/remont demos/remont
 
 # 2. Внести правку (вручную или скриптом scripts/patch-remont-demo.mjs)
 node scripts/patch-remont-demo.mjs
-node scripts/check-remont-demo.mjs        # проверка: пометка о демо, нет обещаний
+node scripts/check-demo-notices.mjs       # пометка о демо, нет обещаний
+node scripts/check-layout.mjs --site remont   # текст не наезжает и не вылезает за сетку
 
-# 3. Выложить обратно
-FTP_DIR=/www/rootlost.ru/remont node scripts/deploy.mjs
+# 3. Выложить обратно — именно из папки демо, а не из dist портфолио
+FTP_SRC=demos/remont FTP_EXCLUDE=README.md FTP_DIR=/www/rootlost.ru/remont node scripts/deploy.mjs
 ```
 
-`scripts/patch-remont-demo.mjs` — разовая правка от 22.09.2026: она добавляет
+`scripts/patch-remont-demo.mjs` — разовая правка от 22–23.09.2026: она добавляет
 пометку о демонстрационном проекте в подвал, убирает неподтверждённые обещания
-(возраст компании, гарантию, бесплатный повторный ремонт) и приводит `canonical`
-к настоящему адресу. Повторный запуск на уже исправленных файлах ничего не
-меняет — замены не находят исходных формулировок.
+(возраст компании, гарантию, бесплатный повторный ремонт), приводит `canonical`
+к настоящему адресу, чинит список селекторов тап-целей в `css/style.css`
+(из-за него ссылки в крошках, подвале и контактах получили `position: absolute`
+и наехали на заголовки) и убирает опечатку «Цены указаны и указаны».
+Повторный запуск на уже исправленных файлах ничего не меняет — замены не
+находят исходных формулировок.
 
 ## Что важно не сломать
 
@@ -37,5 +41,11 @@ FTP_DIR=/www/rootlost.ru/remont node scripts/deploy.mjs
   Пока это демо, пометка обязательна.
 - **`canonical` и `og:url`** указывают на `https://rootlost.ru/remont/…`.
   В исходном макете стоял адрес `techremont.example`, которого не существует.
+- **Ссылки внутри текста не делают `position: absolute`.** В `css/style.css` два
+  соседних правила: у ссылок — `position: relative`, у их `::before` — растяжка
+  области нажатия. Если слить их в один список, весь текст крошек, подвала и
+  блока заявки уедет к левому краю. Проверка — `check-layout.mjs`.
 - Папка `portfolio-site/dist` эту не перезаписывает: выгрузка портфолио идёт
-  в корень сайта и подпапку `remont` не затрагивает.
+  в корень сайта и подпапку `remont` не затрагивает. Команда выгрузки поэтому
+  содержит `FTP_SRC=demos/remont`: без неё `deploy.mjs` возьмёт `dist` и
+  положит в `/remont` файлы портфолио.

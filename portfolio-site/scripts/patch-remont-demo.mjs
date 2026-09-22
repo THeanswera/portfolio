@@ -6,7 +6,14 @@
 //    12 месяцев, «устраним бесплатно» и «повторный ремонт бесплатно»;
 // 3) переводит условия в образец оформления: «пример условия», «в макете»;
 // 4) приводит адрес сайта в canonical и og:url к тому, где он на самом деле лежит;
-// 5) добавляет стиль .footer__demo в css/style.css.
+// 5) чинит список селекторов тап-целей в css/style.css (из-за него ссылки в
+//    крошках, подвале и контактах получили position: absolute и наехали на текст);
+// 6) убирает опечатку «Цены указаны и указаны без стоимости запчастей»;
+// 7) разрешает перенос внутри длинного слова в заголовке (на 320px он вылезал
+//    за колонку);
+// 8) добавляет стиль .footer__demo в css/style.css.
+//
+// Скрипт идемпотентен: повторный запуск на исправленных файлах ничего не меняет.
 //
 // Запуск: node scripts/patch-remont-demo.mjs
 import { readFile, readdir, writeFile } from 'node:fs/promises';
@@ -97,6 +104,10 @@ const REPLACEMENTS = [
   ['https://techremont.example/service-3.html', 'https://rootlost.ru/remont/service-3.html'],
   ['https://techremont.example', 'https://rootlost.ru/remont'],
   ['info@techremont.ru', 'info@example.com'],
+
+  // Опечатка исходного макета: «Цены указаны и указаны без стоимости запчастей».
+  // Перенос строки в замене сохраняет принятую в файле ширину абзаца.
+  ['Цены указаны и указаны без стоимости запчастей', 'Цены указаны\n            без стоимости запчастей'],
 ];
 
 /** Заменяет формулировку, не обращая внимания на переносы строк внутри неё. */
@@ -146,6 +157,99 @@ for (const file of htmlFiles) {
 const cssPath = path.join(root, 'css', 'style.css');
 let css = await readFile(cssPath, 'utf8');
 
+/**
+ * Тап-цели ссылок внутри текста.
+ *
+ * В опубликованном style.css список селекторов остался без закрывающей скобки:
+ * ссылки и их псевдоэлементы попали в одно правило и вместе с `content: ""`
+ * получили `position: absolute`. Из-за этого «Главная» и «Услуги» в крошках,
+ * контакты в подвале и телефон с почтой в блоке заявки уехали к левому краю и
+ * наложились на заголовки. Возвращаем ссылкам отдельное правило: псевдоэлемент
+ * по-прежнему расширяет область нажатия, но отсчитывается от самой ссылки.
+ */
+const BROKEN_TAP_TARGETS = `.request__contacts a,
+.footer__contact a,
+.section__note a,
+.breadcrumbs a,
+.footer__bottom-links a,
+.form__consent-text a,
+
+.request__contacts a::before,
+.footer__contact a::before,
+.section__note a::before,
+.breadcrumbs a::before,
+.footer__bottom-links a::before,
+.form__consent-text a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -13px;
+  bottom: -13px;
+}`;
+
+const FIXED_TAP_TARGETS = `.request__contacts a,
+.footer__contact a,
+.section__note a,
+.breadcrumbs a,
+.footer__bottom-links a,
+.form__consent-text a {
+  position: relative;
+}
+
+.request__contacts a::before,
+.footer__contact a::before,
+.section__note a::before,
+.breadcrumbs a::before,
+.footer__bottom-links a::before,
+.form__consent-text a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -13px;
+  bottom: -13px;
+}`;
+
+/**
+ * Перенос внутри длинного слова в заголовке.
+ *
+ * «Политика конфиденциальности» на экране 320px шире колонки на 11px: заголовок
+ * вылезал за сетку и обрезался. Правило срабатывает только тогда, когда слово
+ * само не помещается в строку, поэтому на обычных ширинах вид не меняется.
+ */
+const PLAIN_TITLE = `.page-hero__title {
+  font-size: var(--fs-3xl);
+  color: #fff;
+  max-width: 24ch;
+}`;
+
+const WRAPPING_TITLE = `.page-hero__title {
+  font-size: var(--fs-3xl);
+  color: #fff;
+  max-width: 24ch;
+}
+
+.page-hero__title,
+.hero__title,
+.section__title,
+.request__title,
+.cta__title {
+  overflow-wrap: break-word;
+}`;
+
+const cssNotes = [];
+
+if (css.includes(BROKEN_TAP_TARGETS)) {
+  css = css.replace(BROKEN_TAP_TARGETS, FIXED_TAP_TARGETS);
+  cssNotes.push('починено правило тап-целей: ссылки больше не position: absolute');
+}
+
+if (css.includes(PLAIN_TITLE)) {
+  css = css.replace(PLAIN_TITLE, WRAPPING_TITLE);
+  cssNotes.push('добавлен перенос внутри длинных слов в заголовках');
+}
+
 if (!css.includes('.footer__demo')) {
   css += `
 /* Пометка о демонстрационном проекте: заметная, но в палитре сайта.
@@ -170,10 +274,13 @@ if (!css.includes('.footer__demo')) {
   }
 }
 `;
-  await writeFile(cssPath, css, 'utf8');
+  cssNotes.push('добавлен стиль .footer__demo');
 }
+
+// Пишем файл, если менялось хоть что-то: починка правила и пометка независимы.
+if (cssNotes.length > 0) await writeFile(cssPath, css, 'utf8');
 
 for (const item of report) {
   console.log(`${item.file.padEnd(18)} ${item.changes.length ? item.changes.join('; ') : 'изменений нет'}`);
 }
-console.log('\ncss/style.css — стиль .footer__demo добавлен');
+console.log(`\ncss/style.css — ${cssNotes.length ? cssNotes.join('; ') : 'изменений нет'}`);

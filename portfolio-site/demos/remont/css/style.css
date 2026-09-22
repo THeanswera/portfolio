@@ -259,7 +259,9 @@ table {
 .section__note a,
 .breadcrumbs a,
 .footer__bottom-links a,
-.form__consent-text a,
+.form__consent-text a {
+  position: relative;
+}
 
 .request__contacts a::before,
 .footer__contact a::before,
@@ -876,6 +878,14 @@ table {
   font-size: var(--fs-3xl);
   color: #fff;
   max-width: 24ch;
+}
+
+.page-hero__title,
+.hero__title,
+.section__title,
+.request__title,
+.cta__title {
+  overflow-wrap: break-word;
 }
 
 .page-hero__text {
