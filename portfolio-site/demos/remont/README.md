@@ -25,7 +25,7 @@ node scripts/check-layout.mjs --site remont   # текст не наезжает
 FTP_SRC=demos/remont FTP_EXCLUDE=README.md FTP_DIR=/www/rootlost.ru/remont node scripts/deploy.mjs
 ```
 
-`scripts/patch-remont-demo.mjs` — разовая правка от 22–23.09.2026: она добавляет
+`scripts/patch-remont-demo.mjs` — разовая правка от 22.09.2026: она добавляет
 пометку о демонстрационном проекте в подвал, убирает неподтверждённые обещания
 (возраст компании, гарантию, бесплатный повторный ремонт), приводит `canonical`
 к настоящему адресу, чинит список селекторов тап-целей в `css/style.css`
