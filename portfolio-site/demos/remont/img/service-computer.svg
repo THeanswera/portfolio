@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img">
+
+  <rect width="800" height="600" fill="#F2F5FA"/>
+  <circle cx="240" cy="510" r="230" fill="#0C2340" opacity="0.16"/>
+  <circle cx="730" cy="180" r="190" fill="#ED6A2C" opacity="0.10"/>
+  <g stroke="#0C2340" stroke-opacity="0.06" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="600"/><line x1="60" y1="0" x2="60" y2="600"/><line x1="120" y1="0" x2="120" y2="600"/><line x1="180" y1="0" x2="180" y2="600"/><line x1="240" y1="0" x2="240" y2="600"/><line x1="300" y1="0" x2="300" y2="600"/><line x1="360" y1="0" x2="360" y2="600"/><line x1="420" y1="0" x2="420" y2="600"/><line x1="480" y1="0" x2="480" y2="600"/><line x1="540" y1="0" x2="540" y2="600"/><line x1="600" y1="0" x2="600" y2="600"/><line x1="660" y1="0" x2="660" y2="600"/><line x1="720" y1="0" x2="720" y2="600"/><line x1="780" y1="0" x2="780" y2="600"/><line x1="840" y1="0" x2="840" y2="600"/>
+    <line x1="0" y1="0" x2="800" y2="0"/><line x1="0" y1="60" x2="800" y2="60"/><line x1="0" y1="120" x2="800" y2="120"/><line x1="0" y1="180" x2="800" y2="180"/><line x1="0" y1="240" x2="800" y2="240"/><line x1="0" y1="300" x2="800" y2="300"/><line x1="0" y1="360" x2="800" y2="360"/><line x1="0" y1="420" x2="800" y2="420"/><line x1="0" y1="480" x2="800" y2="480"/><line x1="0" y1="540" x2="800" y2="540"/><line x1="0" y1="600" x2="800" y2="600"/>
+  </g>
+
+  <ellipse cx="400" cy="508" rx="205" ry="26" fill="#0C2340" opacity="0.10"/>
+  <g transform="translate(160 140)">
+    <rect x="0" y="0" width="480" height="300" rx="18" fill="#FFFFFF" stroke="#22334A" stroke-width="9"/>
+    <rect x="26" y="26" width="428" height="248" rx="10" fill="#E8EDF5"/>
+    <rect x="60" y="60" width="150" height="18" rx="9" fill="#22334A" opacity="0.18"/>
+    <rect x="60" y="96" width="250" height="18" rx="9" fill="#22334A" opacity="0.12"/>
+    <rect x="60" y="132" width="200" height="18" rx="9" fill="#22334A" opacity="0.12"/>
+    <rect x="60" y="180" width="120" height="60" rx="10" fill="#ED6A2C" opacity="0.3"/>
+    <rect x="212" y="180" width="120" height="60" rx="10" fill="#FFFFFF" stroke="#22334A" stroke-width="6"/>
+    <g stroke="#ED6A2C" stroke-width="6" stroke-linecap="round">
+      <line x1="238" y1="198" x2="306" y2="198"/><line x1="238" y1="222" x2="278" y2="222"/>
+    </g>
+    <path d="M-46 300h572l40 74a12 12 0 0 1-10 17H-76a12 12 0 0 1-10-17z" fill="#FFFFFF" stroke="#22334A" stroke-width="9" stroke-linejoin="round"/>
+    <rect x="180" y="322" width="120" height="28" rx="10" fill="#E8EDF5" stroke="#22334A" stroke-width="6"/>
+  </g>
+  <g transform="translate(600 180)">
+    <rect x="0" y="0" width="110" height="110" rx="16" fill="#ED6A2C" opacity="0.18"/>
+    <rect x="26" y="26" width="58" height="58" rx="10" fill="none" stroke="#ED6A2C" stroke-width="7"/>
+  </g>
+
+</svg>

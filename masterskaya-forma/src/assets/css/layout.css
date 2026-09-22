@@ -226,10 +226,13 @@
   margin-top: 26px;
   padding: 14px 16px;
   border: 1px dashed var(--line-2);
+  border-left: 3px solid var(--wood);
   border-radius: var(--radius);
   font-size: 13px;
   line-height: 1.5;
-  color: var(--text-dim);
+  /* Раньше стоял --text-dim: на фоне подвала это 3.84:1 — ниже нормы 4.5:1
+     для мелкого текста. Приглушённый светлый даёт 9.75:1 и остаётся спокойным. */
+  color: #c2bfb9;
 }
 
 .footer__demo svg {

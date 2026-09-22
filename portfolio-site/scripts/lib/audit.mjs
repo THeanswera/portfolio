@@ -36,18 +36,25 @@ export const REVEAL_ALL = `
     return true;
   })()`;
 
-/** Плавно прокручивает страницу до конца, чтобы сработали наблюдатели и догрузились картинки. */
+/**
+ * Прокручивает страницу до конца, чтобы сработали наблюдатели появления и
+ * догрузились картинки.
+ *
+ * Шаг — половина экрана, пауза — 700 мс: появление блока занимает 0.7 с, и при
+ * быстрой прокрутке проверка видела ещё не появившиеся блоки как дефект.
+ * Блок выше экрана при большом шаге и вовсе проскакивает между положениями.
+ */
 export const SCROLL_THROUGH = `
   (async () => {
-    const step = Math.round(window.innerHeight * 0.8);
+    const step = Math.max(200, Math.round(window.innerHeight * 0.5));
     for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
       window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 90));
+      await new Promise((r) => setTimeout(r, 700));
     }
     window.scrollTo(0, document.documentElement.scrollHeight);
-    await new Promise((r) => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 900));
     window.scrollTo(0, 0);
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 300));
     return true;
   })()`;
 

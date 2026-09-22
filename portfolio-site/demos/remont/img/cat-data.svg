@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img">
+
+  <rect width="800" height="600" fill="#F2F5FA"/>
+  <circle cx="640" cy="510" r="230" fill="#0C2340" opacity="0.16"/>
+  <circle cx="730" cy="480" r="190" fill="#ED6A2C" opacity="0.10"/>
+  <g stroke="#0C2340" stroke-opacity="0.06" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="600"/><line x1="60" y1="0" x2="60" y2="600"/><line x1="120" y1="0" x2="120" y2="600"/><line x1="180" y1="0" x2="180" y2="600"/><line x1="240" y1="0" x2="240" y2="600"/><line x1="300" y1="0" x2="300" y2="600"/><line x1="360" y1="0" x2="360" y2="600"/><line x1="420" y1="0" x2="420" y2="600"/><line x1="480" y1="0" x2="480" y2="600"/><line x1="540" y1="0" x2="540" y2="600"/><line x1="600" y1="0" x2="600" y2="600"/><line x1="660" y1="0" x2="660" y2="600"/><line x1="720" y1="0" x2="720" y2="600"/><line x1="780" y1="0" x2="780" y2="600"/><line x1="840" y1="0" x2="840" y2="600"/>
+    <line x1="0" y1="0" x2="800" y2="0"/><line x1="0" y1="60" x2="800" y2="60"/><line x1="0" y1="120" x2="800" y2="120"/><line x1="0" y1="180" x2="800" y2="180"/><line x1="0" y1="240" x2="800" y2="240"/><line x1="0" y1="300" x2="800" y2="300"/><line x1="0" y1="360" x2="800" y2="360"/><line x1="0" y1="420" x2="800" y2="420"/><line x1="0" y1="480" x2="800" y2="480"/><line x1="0" y1="540" x2="800" y2="540"/><line x1="0" y1="600" x2="800" y2="600"/>
+  </g>
+
+  <ellipse cx="400" cy="508" rx="205" ry="26" fill="#0C2340" opacity="0.10"/>
+  <g transform="translate(180 140)">
+    <ellipse cx="160" cy="70" rx="160" ry="58" fill="#FFFFFF" stroke="#22334A" stroke-width="9"/>
+    <path d="M0 70v150c0 32 72 58 160 58s160-26 160-58V70" fill="#FFFFFF" stroke="#22334A" stroke-width="9"/>
+    <path d="M0 145c0 32 72 58 160 58s160-26 160-58" fill="none" stroke="#22334A" stroke-width="7" opacity="0.45"/>
+    <path d="M0 220c0 32 72 58 160 58s160-26 160-58" fill="none" stroke="#22334A" stroke-width="7" opacity="0.3"/>
+    <circle cx="160" cy="70" r="26" fill="#ED6A2C" opacity="0.35"/>
+  </g>
+  <g transform="translate(560 300)">
+    <circle cx="60" cy="60" r="56" fill="#FFFFFF" stroke="#22334A" stroke-width="8"/>
+    <path d="M60 22v40l26 18" fill="none" stroke="#ED6A2C" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+</svg>

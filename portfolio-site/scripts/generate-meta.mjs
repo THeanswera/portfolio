@@ -42,9 +42,9 @@ const robots = [
   'User-agent: *',
   'Allow: /',
   '',
-  '# Служебные адреса: закрыты от индексации, но открыты для обхода.',
+  // Старый адрес кейсов: сервер перенаправляет его на /cases/<slug>/,
+  // но саму страницу в поиске держать незачем.
   'Disallow: /case.html',
-  'Disallow: /render.html',
   '',
   `Sitemap: ${siteInfo.origin}/sitemap.xml`,
   '',

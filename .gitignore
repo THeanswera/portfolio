@@ -36,3 +36,6 @@ desktop.ini
 # Заявки, сохранённые обработчиком демо-сайта
 masterskaya-forma/public/data/leads.jsonl
 masterskaya-forma/public/data/rate.json
+
+# Копии живых сайтов перед выкладкой: нужны для отката, в репозиторий не идут
+/.backup/deploy-*/

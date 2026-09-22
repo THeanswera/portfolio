@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img">
+  <rect width="1200" height="630" fill="#0C2340"/>
+  <g opacity="0.16" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="630"/><line x1="60" y1="0" x2="60" y2="630"/><line x1="120" y1="0" x2="120" y2="630"/><line x1="180" y1="0" x2="180" y2="630"/><line x1="240" y1="0" x2="240" y2="630"/><line x1="300" y1="0" x2="300" y2="630"/><line x1="360" y1="0" x2="360" y2="630"/><line x1="420" y1="0" x2="420" y2="630"/><line x1="480" y1="0" x2="480" y2="630"/><line x1="540" y1="0" x2="540" y2="630"/><line x1="600" y1="0" x2="600" y2="630"/><line x1="660" y1="0" x2="660" y2="630"/><line x1="720" y1="0" x2="720" y2="630"/><line x1="780" y1="0" x2="780" y2="630"/><line x1="840" y1="0" x2="840" y2="630"/><line x1="900" y1="0" x2="900" y2="630"/><line x1="960" y1="0" x2="960" y2="630"/><line x1="1020" y1="0" x2="1020" y2="630"/><line x1="1080" y1="0" x2="1080" y2="630"/><line x1="1140" y1="0" x2="1140" y2="630"/><line x1="1200" y1="0" x2="1200" y2="630"/>
+    <line x1="0" y1="0" x2="1200" y2="0"/><line x1="0" y1="60" x2="1200" y2="60"/><line x1="0" y1="120" x2="1200" y2="120"/><line x1="0" y1="180" x2="1200" y2="180"/><line x1="0" y1="240" x2="1200" y2="240"/><line x1="0" y1="300" x2="1200" y2="300"/><line x1="0" y1="360" x2="1200" y2="360"/><line x1="0" y1="420" x2="1200" y2="420"/><line x1="0" y1="480" x2="1200" y2="480"/><line x1="0" y1="540" x2="1200" y2="540"/><line x1="0" y1="600" x2="1200" y2="600"/>
+  </g>
+  <circle cx="1080" cy="90" r="260" fill="#ED6A2C" opacity="0.18"/>
+  <circle cx="120" cy="600" r="220" fill="#3E7CB1" opacity="0.2"/>
+  <g transform="translate(90 150)">
+    <text x="0" y="0" font-family="Montserrat, Arial, sans-serif" font-size="62" font-weight="700" fill="#FFFFFF">Тех<tspan fill="#ED6A2C">Ремонт</tspan></text>
+    <text x="0" y="96" font-family="Montserrat, Arial, sans-serif" font-size="46" font-weight="700" fill="#FFFFFF">Сервисный центр по ремонту</text>
+    <text x="0" y="156" font-family="Montserrat, Arial, sans-serif" font-size="46" font-weight="700" fill="#FFFFFF">бытовой техники и электроники</text>
+    <text x="0" y="238" font-family="Inter, Arial, sans-serif" font-size="28" fill="#A9BCD2">Бытовая техника · Компьютеры и ноутбуки · Телефоны и планшеты</text>
+    <g transform="translate(0 300)">
+      <rect x="0" y="0" width="360" height="86" rx="14" fill="#ED6A2C"/>
+      <text x="180" y="55" font-family="Montserrat, Arial, sans-serif" font-size="34" font-weight="700" fill="#FFFFFF" text-anchor="middle">+7 (800) 555-35-35</text>
+    </g>
+    <text x="400" y="352" font-family="Inter, Arial, sans-serif" font-size="24" fill="#8FA6BF">Ежедневно 9:00–21:00 · Москва и МО</text>
+  </g>
+</svg>
